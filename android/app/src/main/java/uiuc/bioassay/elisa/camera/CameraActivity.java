@@ -58,7 +58,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -77,7 +76,7 @@ import java.util.Date;
 
 import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
-import uiuc.bioassay.elisa.proc.TLCProcActivity;
+import uiuc.bioassay.elisa.proc.ELISABBProcActivity;
 
 @SuppressWarnings("deprecation")
 public class CameraActivity extends AppCompatActivity implements
@@ -90,7 +89,7 @@ public class CameraActivity extends AppCompatActivity implements
     private Button buttonCapture;
     private String rootFolder;
     private String currentFolder;
-    private boolean isBlankPlate = false;
+    private boolean isBroadBand;
     private TextView instructions;
     private TextView title;
 
@@ -121,21 +120,19 @@ public class CameraActivity extends AppCompatActivity implements
                 if (picCount < ELISAApplication.MAX_PICTURE) {
                     mCamera.takePicture(null, null,
                             mPicture);
-                } else if (!isBlankPlate) {
+                } else {
                     stopSeriesSound.play();
                     picCount = 0;
                     buttonCapture.setEnabled(true);
-                    mPreview.setFocusOnTouch(false);
-                    currentFolder = rootFolder + File.separator + ELISAApplication.BG_FOLDER;
-                    isBlankPlate = true;
-                } else {
-                    // Done
-                    stopSeriesSound.play();
-                    exportLocationToFile();
-                    Intent intent = new Intent(CameraActivity.this, TLCProcActivity.class);
-                    intent.putExtra(ELISAApplication.FOLDER_EXTRA, rootFolder);
-                    startActivity(intent);
-                    finish();
+                    if (isBroadBand) {
+                        currentFolder = rootFolder + File.separator + ELISAApplication.BB_FOLDER;
+                        exportLocationToFile();
+                        Intent intent = new Intent(CameraActivity.this, ELISABBProcActivity.class);
+                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, rootFolder);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                    }
                 }
             } catch (FileNotFoundException e) {
                 Log.d(TAG, "File not found: " + e.getMessage());
@@ -201,10 +198,6 @@ public class CameraActivity extends AppCompatActivity implements
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!isBlankPlate && !mPreview.isFocusSuccess()) {
-                            Toast.makeText(CameraActivity.this, "Please touch to focus !", Toast.LENGTH_LONG).show();
-                            return;
-                        }
                         buttonCapture.setEnabled(false);
                         startSeriesSound.play();
                         mCamera.takePicture(null, null, mPicture);
@@ -217,6 +210,7 @@ public class CameraActivity extends AppCompatActivity implements
 
         instructions = (TextView) findViewById(R.id.instructions);
         title = (TextView) findViewById(R.id.camera_title);
+        isBroadBand = (getIntent().getAction() == ELISAApplication.ACTION_BROADBAND) ? true : false;
 
         mLastUpdateTime = "";
 
@@ -405,9 +399,8 @@ public class CameraActivity extends AppCompatActivity implements
         if (mCamera == null) {
             openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
         }
-        if (isBlankPlate) {
-            title.setText("Blank plate screen");
-            instructions.setText("- Make sure your environment is DARK, turn off the light\\n\\n- Turn on the UV Lamp, wait for 10 seconds\\n\\n- Insert a CLEAN BLANK plate and slide to the end of the cradle\\n\\n- Press CAPTURE");
+        if (isBroadBand) {
+            title.setText("Broadband Screen");
         }
     }
 
@@ -556,13 +549,13 @@ public class CameraActivity extends AppCompatActivity implements
         params.setJpegQuality(100);
 
         // Set focus mode
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
 
         // Set exposure offset
         params.setExposureCompensation(0);
 
         // Set white balance
-        params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_DAYLIGHT);
+        params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
 
         // Set iso
         params.set("iso", String.valueOf("200"));
@@ -583,7 +576,7 @@ public class CameraActivity extends AppCompatActivity implements
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
 
-        mPreview.setFocusOnTouch(getIntent().getBooleanExtra(ELISAApplication.AUTO_FOCUS, true));
+        mPreview.setFocusOnTouch(false);
 
         preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);

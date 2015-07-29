@@ -12,7 +12,7 @@ extern "C" {
  * Method:    cleanFolder
  * Signature: (Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_uiuc_bioassay_tlc_TLCApplication_cleanFolder
+JNIEXPORT void JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_cleanFolder
   (JNIEnv *, jclass, jstring);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT void JNICALL Java_uiuc_bioassay_tlc_TLCApplication_cleanFolder
  * Method:    processTLC
  * Signature: (Ljava/lang/String;)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_tlc_TLCApplication_processTLC
+JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processTLC
   (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus

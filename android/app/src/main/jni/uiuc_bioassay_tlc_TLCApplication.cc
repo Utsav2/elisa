@@ -1,7 +1,7 @@
 #include "uiuc_bioassay_tlc_TLCApplication.h"
 #include "tlc.h"
 
-JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_tlc_TLCApplication_processTLC
+JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processTLC
   (JNIEnv *env, jclass, jstring jstr) {
   const char *path = env->GetStringUTFChars(jstr, nullptr);
 
@@ -38,7 +38,7 @@ JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_tlc_TLCApplication_processTLC
 }
 
 JNIEXPORT void JNICALL
-Java_uiuc_bioassay_tlc_TLCApplication_cleanFolder(JNIEnv *env, jclass,
+Java_uiuc_bioassay_elisa_ELISAApplication_cleanFolder(JNIEnv *env, jclass,
                                                     jstring jstr) {
   const char *path = env->GetStringUTFChars(jstr, nullptr);
   std::string cmd("exec rm -r ");

@@ -237,6 +237,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                                 phoneNumber.getText().toString(), drugINN.getText().toString(), lotNumber.getText().toString(), expireDay.getText().toString(),
                                 phoneID.getText().toString()*/);
                         Intent intent = new Intent(ExpIntroActivity.this, CameraActivity.class);
+                        intent.setAction(ELISAApplication.ACTION_BROADBAND);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath());
                         startActivity(intent);
                         finish();

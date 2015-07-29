@@ -48,7 +48,7 @@
             android:label="@string/title_activity_camera" >
         </activity>
         <activity
-            android:name=".proc.TLCProcActivity"
+            android:name=".proc.ELISABBProcActivity"
             android:label="@string/title_activity_tlcproc" >
         </activity>
 
