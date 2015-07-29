@@ -1,8 +1,8 @@
 CC = g++-5
-CFLAGS = -Wall -Wextra -std=c++14 -g -funroll-loops -O3
+CFLAGS = -Wall -Wextra -std=c++14 -g -funroll-loops -O3 -DDEBUG
 LDFLAGS = -L/usr/local/lib -ljpeg -lpng
 #LIBS = -stdlib=libc++
-SRCS = main.cc imtoolbox.cc tlc.cc
+SRCS = main.cc imtoolbox.cc elisa.cc
 OBJS = $(SRCS:.cc=.o)
 EXES = main
 

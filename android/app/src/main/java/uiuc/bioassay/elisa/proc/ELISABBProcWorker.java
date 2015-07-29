@@ -21,8 +21,6 @@ import uiuc.bioassay.elisa.R;
 import uiuc.bioassay.elisa.services.NetworkService;
 
 import static uiuc.bioassay.elisa.ELISAApplication.AVG_FILE_NAME;
-import static uiuc.bioassay.elisa.ELISAApplication.LOG_FILE;
-import static uiuc.bioassay.elisa.ELISAApplication.SAMPLE_FOLDER;
 import static uiuc.bioassay.elisa.ELISAApplication.processBBELISA;
 
 /**
@@ -57,8 +55,8 @@ public class ELISABBProcWorker extends AsyncTask<String, Void, double[]> {
     protected void onPostExecute(final double[] spots) {
         progressDialog.dismiss();
         for (int i = 0; i < ELISAApplication.MAX_PICTURE; ++i) {
-            NetworkService.startActionUpload(mContext, folder + File.separator + SAMPLE_FOLDER + AVG_FILE_NAME);
-            NetworkService.startActionUpload(mContext, folder + File.separator + LOG_FILE);
+            NetworkService.startActionUpload(mContext, folder + File.separator + ELISAApplication.BB_FOLDER + AVG_FILE_NAME);
+            //NetworkService.startActionUpload(mContext, folder + File.separator + LOG_FILE);
         }
         if (spots == null) {
             return;

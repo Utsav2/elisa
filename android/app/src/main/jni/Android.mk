@@ -9,8 +9,8 @@ include $(CLEAR_VARS)
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
     LOCAL_ARM_NEON := true
 endif
-LOCAL_MODULE		:= tlc
-LOCAL_SRC_FILES	 	:= imtoolbox.cc tlc.cc uiuc_bioassay_tlc_TLCApplication.cc
+LOCAL_MODULE		:= elisa
+LOCAL_SRC_FILES	 	:= imtoolbox.cc elisa.cc uiuc_bioassay_elisa_ELISAApplication.cc
 LOCAL_C_INCLUDES 	+= $(LOCAL_PATH)/libjpeg $(LOCAL_PATH)/libpng $(LOCAL_PATH)
 LOCAL_STATIC_LIBRARIES 	:= libpng libjpeg 
 #LOCAL_CPP_FEATURES 	+= exceptions

@@ -14,7 +14,7 @@ import java.math.RoundingMode;
  */
 public class ELISAApplication extends Application {
     static {
-        System.loadLibrary("tlc");
+        System.loadLibrary("elisa");
     }
 
     public static final String FOLDER_EXTRA = "FOLDER_EXTRA";
@@ -48,45 +48,8 @@ public class ELISAApplication extends Application {
         return bd.doubleValue();
     }
 
-    public static void hideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
-    }
-
-    /**
-     * set screen off timeout
-     * @param screenOffTimeout int 0~6
-     */
-    public static void setTimeout(Activity activity, int screenOffTimeout) {
-        int time;
-        switch (screenOffTimeout) {
-            case 0:
-                time = 15000;
-                break;
-            case 1:
-                time = 30000;
-                break;
-            case 2:
-                time = 60000;
-                break;
-            case 3:
-                time = 120000;
-                break;
-            case 4:
-                time = 600000;
-                break;
-            case 5:
-                time = 1800000;
-                break;
-            default:
-                time = -1;
-        }
-        android.provider.Settings.System.putInt(activity.getContentResolver(),
-                Settings.System.SCREEN_OFF_TIMEOUT, time);
-    }
-
-
     /* Native signatures */
     public native static void cleanFolder(String folder);
     public native static double[] processBBELISA(String folder);
+    public native static double[] processSampleELISA(String folder);
 }
