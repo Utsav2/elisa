@@ -32,7 +32,7 @@
                 android:src="@drawable/uiuc_logo"
                 android:scaleType="centerInside"
                 android:contentDescription="@string/logo" />
-            <TextView android:text="New TLC Experiment" android:layout_width="wrap_content"
+            <TextView android:text="New ELISA Experiment" android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:textSize="20sp"/>
@@ -87,7 +87,7 @@
                     android:selectAllOnFocus="true"/>
             </TableRow>
 
-
+            <!--
             <TableRow
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
@@ -233,7 +233,8 @@
                     android:maxLength="32"
                     android:id="@+id/phone_id"
                     android:selectAllOnFocus="true"/>
-            </TableRow>
+
+            </TableRow> -->
             </TableLayout>
 
             <Button

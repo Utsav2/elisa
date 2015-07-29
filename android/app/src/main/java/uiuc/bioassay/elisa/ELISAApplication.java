@@ -12,13 +12,19 @@ import java.math.RoundingMode;
 /**
  * Created by meowle on 7/1/15.
  */
-public class TLCApplication extends Application {
+public class ELISAApplication extends Application {
     static {
         System.loadLibrary("tlc");
     }
     public static final String AUTO_FOCUS = "AUTO_FOCUS";
     public static final String FOLDER_EXTRA = "FOLDER_EXTRA";
     public static final String ROOT_FOLDER = Environment.getExternalStorageDirectory() + "/Android/data/uiuc.bioassay.elisa";
+
+    public static double RED_LASER_PEAK = 1016.037828;
+    public static double GREEN_LASER_PEAK = 1443.327951;
+    public static final double RED_LASER_NM = 656.26;
+    public static final double GREEN_LASER_NM = 532.1;
+
 
 
     /*----------------------------------------------------------------------------*/

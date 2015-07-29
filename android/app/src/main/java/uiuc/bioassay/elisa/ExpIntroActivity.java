@@ -25,7 +25,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
 
-import static uiuc.bioassay.elisa.TLCApplication.cleanFolder;
+import uiuc.bioassay.elisa.camera.CameraActivity;
+
+import static uiuc.bioassay.elisa.ELISAApplication.cleanFolder;
 
 
 public class ExpIntroActivity extends AppCompatActivity {
@@ -93,6 +95,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
+        /*
         final EditText userID = (EditText) findViewById(R.id.user_ID);
         userID.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
@@ -221,7 +224,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                         }
                     }
                 }
-        );
+        ); */
 
         Button expNext = (Button) findViewById(R.id.exp_next);
         final DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -230,11 +233,11 @@ public class ExpIntroActivity extends AppCompatActivity {
                 switch (which){
                     case DialogInterface.BUTTON_POSITIVE:
                         cleanFolder(folder.getAbsolutePath());
-                        exportToFile(expName.getText().toString(), expDay.getText().toString(), userID.getText().toString(), userName.getText().toString(),
+                        exportToFile(expName.getText().toString(), expDay.getText().toString()/*, userID.getText().toString(), userName.getText().toString(),
                                 phoneNumber.getText().toString(), drugINN.getText().toString(), lotNumber.getText().toString(), expireDay.getText().toString(),
-                                phoneID.getText().toString());
-                        Intent intent = new Intent(ExpIntroActivity.this, PillsActivity.class);
-                        intent.putExtra(TLCApplication.FOLDER_EXTRA, folder.getAbsolutePath());
+                                phoneID.getText().toString()*/);
+                        Intent intent = new Intent(ExpIntroActivity.this, CameraActivity.class);
+                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath());
                         startActivity(intent);
                         finish();
                         break;
@@ -268,7 +271,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                             alertDialog.show();
                             editText = expDay;
                             return;
-                        } else if (userID.getText().toString().equals("")) {
+                        } /*else if (userID.getText().toString().equals("")) {
                             alertDialog.setMessage("Please enter user ID");
                             alertDialog.show();
                             editText = userID;
@@ -293,8 +296,8 @@ public class ExpIntroActivity extends AppCompatActivity {
                             alertDialog.show();
                             editText = expireDay;
                             return;
-                        }
-                        folder = new File(TLCApplication.ROOT_FOLDER, expName.getText().toString());
+                        } */
+                        folder = new File(ELISAApplication.ROOT_FOLDER, expName.getText().toString());
                         if (folder.exists()) {
                             final AlertDialog.Builder builder = new AlertDialog.Builder(ExpIntroActivity.this);
                             builder.setTitle(Html.fromHtml("<font color='#FFF12C'>Warning</font>")).setIcon(R.drawable.alert)
@@ -311,11 +314,11 @@ public class ExpIntroActivity extends AppCompatActivity {
                             Toast.makeText(ExpIntroActivity.this, "Cannot create folder", Toast.LENGTH_LONG).show();
                             return;
                         } else {
-                            exportToFile(expName.getText().toString(), expDay.getText().toString(), userID.getText().toString(), userName.getText().toString(),
+                            exportToFile(expName.getText().toString(), expDay.getText().toString()/*, userID.getText().toString(), userName.getText().toString(),
                                     phoneNumber.getText().toString(), drugINN.getText().toString(), lotNumber.getText().toString(), expireDay.getText().toString(),
-                                    phoneID.getText().toString());
-                            Intent intent = new Intent(ExpIntroActivity.this, PillsActivity.class);
-                            intent.putExtra(TLCApplication.FOLDER_EXTRA, folder.getAbsolutePath());
+                                    phoneID.getText().toString()*/);
+                            Intent intent = new Intent(ExpIntroActivity.this, CameraActivity.class);
+                            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath());
                             startActivity(intent);
                             finish();
                         }
@@ -348,21 +351,22 @@ public class ExpIntroActivity extends AppCompatActivity {
 
 
 
-    private void exportToFile(String expName, String expDay, String userID, String userName, String phoneNumber, String drugINN, String lotNumber, String expireDay, String phoneID) {
+    private void exportToFile(String expName, String expDay/*, String userID, String userName, String phoneNumber, String drugINN, String lotNumber, String expireDay, String phoneID*/) {
         BufferedWriter out = null;
         try
         {
-            FileWriter fstream = new FileWriter(folder.getAbsolutePath() + File.separator + TLCApplication.LOG_FILE, true); //true tells to append data.
+            FileWriter fstream = new FileWriter(folder.getAbsolutePath() + File.separator + ELISAApplication.LOG_FILE, true); //true tells to append data.
             out = new BufferedWriter(fstream);
             out.write("Experiment Name: " + expName + "\n");
             out.write("Experiment Day: " + expDay + "\n");
+            /*
             out.write("User ID: " + userID + "\n");
             out.write("User Name: " + userName + "\n");
             out.write("Phone Number: " + phoneNumber + "\n");
             out.write("Drug Name (INN): " + drugINN + "\n");
             out.write("Lot Number: " + lotNumber + "\n");
             out.write("Expiration Day: " + expireDay + "\n");
-            out.write("Phone ID: " + phoneID + "\n");
+            out.write("Phone ID: " + phoneID + "\n");*/
             out.flush();
         }
         catch (IOException e)

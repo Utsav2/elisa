@@ -36,12 +36,12 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
-        Button intro_next = (Button) findViewById(R.id.intro_next);
+        Button intro_next = (Button) findViewById(R.id.use_exist_calib);
         intro_next.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(WelcomeActivity.this, ExpIntroActivity.class);
+                        Intent intent = new Intent(WelcomeActivity.this, CalibInfoActivity.class);
                         startActivity(intent);
                     }
                 }

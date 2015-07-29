@@ -16,15 +16,15 @@ import android.widget.TextView;
 
 import java.io.File;
 
+import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
-import uiuc.bioassay.elisa.TLCApplication;
 import uiuc.bioassay.elisa.services.NetworkService;
 
-import static uiuc.bioassay.elisa.TLCApplication.AVG_FILE_NAME;
-import static uiuc.bioassay.elisa.TLCApplication.LOG_FILE;
-import static uiuc.bioassay.elisa.TLCApplication.SAMPLE_FOLDER;
-import static uiuc.bioassay.elisa.TLCApplication.processTLC;
-import static uiuc.bioassay.elisa.TLCApplication.round;
+import static uiuc.bioassay.elisa.ELISAApplication.AVG_FILE_NAME;
+import static uiuc.bioassay.elisa.ELISAApplication.LOG_FILE;
+import static uiuc.bioassay.elisa.ELISAApplication.SAMPLE_FOLDER;
+import static uiuc.bioassay.elisa.ELISAApplication.processTLC;
+import static uiuc.bioassay.elisa.ELISAApplication.round;
 
 /**
  * Created by meowle on 7/8/15.
@@ -58,7 +58,7 @@ public class TLCProcWorker extends AsyncTask<String, Void, double[]> {
     protected void onPostExecute(final double[] spots) {
         progressDialog.dismiss();
         //NetworkService.startActionUpload(mContext, folder + File.separator + "sample" + File.separator + "avg1.png");
-        for (int i = 0; i < TLCApplication.MAX_PICTURE; ++i) {
+        for (int i = 0; i < ELISAApplication.MAX_PICTURE; ++i) {
             NetworkService.startActionUpload(mContext, folder + File.separator + SAMPLE_FOLDER + AVG_FILE_NAME);
             NetworkService.startActionUpload(mContext, folder + File.separator + LOG_FILE);
         }
@@ -70,7 +70,7 @@ public class TLCProcWorker extends AsyncTask<String, Void, double[]> {
             return;
         }
         ImageView imageView = (ImageView) activity.findViewById(R.id.imageView);
-        imageView.setImageBitmap(decodeIMG(folder + File.separator + TLCApplication.SAMPLE_FOLDER + AVG_FILE_NAME));
+        imageView.setImageBitmap(decodeIMG(folder + File.separator + ELISAApplication.SAMPLE_FOLDER + AVG_FILE_NAME));
 
         TableLayout tableLayout = (TableLayout) activity.findViewById(R.id.results);
         TableRow tr1 = new TableRow(activity);

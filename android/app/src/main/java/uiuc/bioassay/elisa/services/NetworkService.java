@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-import uiuc.bioassay.elisa.TLCApplication;
+import uiuc.bioassay.elisa.ELISAApplication;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -84,7 +84,7 @@ public class NetworkService extends IntentService {
         String mErrorMsg;
         try {
             FileInputStream inputStream = new FileInputStream(file);
-            String fileName = filePath.substring(TLCApplication.ROOT_FOLDER.length() + 1);
+            String fileName = filePath.substring(ELISAApplication.ROOT_FOLDER.length() + 1);
             Log.d(TAG, fileName);
             mDBApi.putFileOverwrite(fileName, inputStream, file.length(), null);
             mErrorMsg = "Upload successfully";

@@ -7,8 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
-import uiuc.bioassay.elisa.TLCApplication;
 
 public class TLCProcActivity extends AppCompatActivity {
     private double[] currResult;
@@ -30,9 +30,9 @@ public class TLCProcActivity extends AppCompatActivity {
                 }
         );
         TLCProcWorker tlcProcWorker = new TLCProcWorker(this);
-        //double[] spots = processTLC(getIntent().getStringExtra(TLCApplication.FOLDER_EXTRA) + "/");
-        tlcProcWorker.execute(getIntent().getStringExtra(TLCApplication.FOLDER_EXTRA));
-        //Log.d("xxx", getIntent().getStringExtra(TLCApplication.FOLDER_EXTRA));
+
+        tlcProcWorker.execute(getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA));
+
         //tlcProcWorker.execute("/storage/sdcard0/Android/data/uiuc.bioassay.elisa/n2-4");
     }
 

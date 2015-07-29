@@ -75,8 +75,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 
+import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
-import uiuc.bioassay.elisa.TLCApplication;
 import uiuc.bioassay.elisa.proc.TLCProcActivity;
 
 @SuppressWarnings("deprecation")
@@ -118,7 +118,7 @@ public class CameraActivity extends AppCompatActivity implements
                 // Take more pictures if still
                 ++picCount;
                 camera.startPreview();
-                if (picCount < TLCApplication.MAX_PICTURE) {
+                if (picCount < ELISAApplication.MAX_PICTURE) {
                     mCamera.takePicture(null, null,
                             mPicture);
                 } else if (!isBlankPlate) {
@@ -126,14 +126,14 @@ public class CameraActivity extends AppCompatActivity implements
                     picCount = 0;
                     buttonCapture.setEnabled(true);
                     mPreview.setFocusOnTouch(false);
-                    currentFolder = rootFolder + File.separator + TLCApplication.BG_FOLDER;
+                    currentFolder = rootFolder + File.separator + ELISAApplication.BG_FOLDER;
                     isBlankPlate = true;
                 } else {
                     // Done
                     stopSeriesSound.play();
                     exportLocationToFile();
                     Intent intent = new Intent(CameraActivity.this, TLCProcActivity.class);
-                    intent.putExtra(TLCApplication.FOLDER_EXTRA, rootFolder);
+                    intent.putExtra(ELISAApplication.FOLDER_EXTRA, rootFolder);
                     startActivity(intent);
                     finish();
                 }
@@ -190,8 +190,8 @@ public class CameraActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        rootFolder = getIntent().getStringExtra(TLCApplication.FOLDER_EXTRA);
-        currentFolder = rootFolder + File.separator + TLCApplication.SAMPLE_FOLDER;
+        rootFolder = getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA);
+        currentFolder = rootFolder + File.separator + ELISAApplication.SAMPLE_FOLDER;
         // Open elisa
         openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
 
@@ -583,7 +583,7 @@ public class CameraActivity extends AppCompatActivity implements
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
 
-        mPreview.setFocusOnTouch(getIntent().getBooleanExtra(TLCApplication.AUTO_FOCUS, true));
+        mPreview.setFocusOnTouch(getIntent().getBooleanExtra(ELISAApplication.AUTO_FOCUS, true));
 
         preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
@@ -645,7 +645,7 @@ public class CameraActivity extends AppCompatActivity implements
         //        Toast.LENGTH_LONG).show();
         BufferedWriter out = null;
         try {
-            FileWriter fstream = new FileWriter(rootFolder + File.separator + TLCApplication.LOG_FILE, true); //true tells to append data.
+            FileWriter fstream = new FileWriter(rootFolder + File.separator + ELISAApplication.LOG_FILE, true); //true tells to append data.
             out = new BufferedWriter(fstream);
             if (mCurrentLocation == null) {
                 out.write("Location: unknown");

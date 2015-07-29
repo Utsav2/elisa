@@ -27,7 +27,7 @@
         android:scaleType="centerInside"
         android:contentDescription="@string/logo" />
 
-        <TextView android:text="Welcome to TLC Plate Reader" android:layout_width="wrap_content"
+        <TextView android:text="Welcome to UIUC Bioassay ELISA" android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textSize="20sp"/>
@@ -36,16 +36,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Press Next to continue\nTo save data on cloud,\nenable Dropbox Sync"
-            android:id="@+id/textView4"
-            android:layout_marginTop="20dp"
+            android:text="@string/experiment_guide"
+            android:layout_marginTop="10dp"
             android:layout_gravity="center_horizontal" />
 
         <Button
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="20dp"
+            android:text="Use existing calibration"
+            android:id="@+id/use_exist_calib"
+            android:layout_gravity="center" />
+
+        <Button
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:text="Start New Calibration"
+            android:id="@+id/new_calib"
+            android:layout_gravity="center" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Next"
-            android:id="@+id/intro_next"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="To save data on cloud, enable Dropbox Sync"
+            android:layout_marginTop="20dp"
             android:layout_gravity="center_horizontal" />
 
         <Switch
@@ -57,19 +73,6 @@
             android:layout_marginTop="20dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Developer: Huy Le\nContact: huyle2@illinois.edu"
-            android:id="@+id/textView"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignLeft="@+id/switch1"
-            android:layout_alignStart="@+id/switch1" />
-
     </LinearLayout>
 
 
