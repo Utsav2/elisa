@@ -41,6 +41,7 @@ std::pair<size_t, size_t> minmax_index(ForwardIterator first,
   return std::make_pair(idx_smallest, idx_largest);
 }
 
+// Maybe I should add backward search
 template <typename M>
 std::vector<Point<fp_t>>
 find_points(const M &m, const std::pair<size_t, size_t> &idxs, fp_t pct) {
@@ -62,6 +63,7 @@ find_points(const M &m, const std::pair<size_t, size_t> &idxs, fp_t pct) {
   return v;
 }
 
+// n-std filter
 void filter_points(std::vector<Point<fp_t>> &points, int n) {
   fp_t mean_x = std::accumulate(points.begin(), points.end(), 0.0,
                                 [](fp_t total, const auto &point) {
@@ -82,7 +84,7 @@ void filter_points(std::vector<Point<fp_t>> &points, int n) {
                          }),
                points.end());
 }
-
+ 
 template <typename T>
 fp_t fit_circle(const std::vector<Point<T>> &p, Circle &circle) {
   fp_t sum_x[3]{};  // Hold sum of x, sum of x^2, sum of x^3
@@ -139,7 +141,7 @@ fp_t fit_circle(const std::vector<Point<T>> &p, Circle &circle) {
 }
 
 template <typename ForwardIterator, typename OutputIt1, typename OutputIt2>
-inline void normalize(ForwardIterator first, ForwardIterator last,
+inline void get_normalized_coeffs_and_mask(ForwardIterator first, ForwardIterator last,
                       OutputIt1 mask_first, OutputIt2 d_first) {
   while (first != last) {
     auto r = *first;
@@ -189,6 +191,7 @@ int process_bb(const std::string &path) noexcept {
     return std::min(255 * x, static_cast<fp_t>(255));
   });
   auto thresh = pctl_hist_thresh(h, 0.7) / 255;
+ 
   auto mask = bb_gray >= thresh;
   std::vector<Rect> rects;
   bwlabel(mask, rects);
@@ -207,7 +210,7 @@ int process_bb(const std::string &path) noexcept {
 
   auto pair_idx = minmax_index(s.begin(), s.end(), thr);
 
-  auto points = find_points(bb_roi(slice::all, slice::all, 0), pair_idx, 0.65);
+  auto points = find_points(bb_roi(slice::all, slice::all, 0), pair_idx, 0.6);
 
   filter_points(points, 2);
 
@@ -229,7 +232,7 @@ int process_bb(const std::string &path) noexcept {
 
   matrix3<fp_t> coeffs(bb_roi.descriptor());
   mask = matrix2<logical>(coeffs.size(0), coeffs.size(1));
-  normalize(bb_roi.begin(), bb_roi.end(), mask.begin(), coeffs.begin());
+  get_normalized_coeffs_and_mask(bb_roi.begin(), bb_roi.end(), mask.begin(), coeffs.begin());
 
   /* Write to file */
   std::fstream ofs(path + BB_DATA, std::ios::out | std::ios::binary);
@@ -283,18 +286,18 @@ int process_sample(const std::string &path, std::vector<fp_t> &s,
   ifs.read(reinterpret_cast<char *>(&bottom_off), sizeof(bottom_off));
   ifs.read(reinterpret_cast<char *>(&col_start), sizeof(col_start));
   ifs.read(reinterpret_cast<char *>(&col_end), sizeof(col_end));
-  println_i(top_off, bottom_off, col_start, col_end);
+ 
   Circle circle;
   ifs.read(reinterpret_cast<char *>(&(circle.xc)), sizeof(circle.xc));
   ifs.read(reinterpret_cast<char *>(&(circle.yc)), sizeof(circle.yc));
-  println_i(circle.xc, circle.yc);
+ 
   size_t height;
   size_t width;
   size_t depth;
   ifs.read(reinterpret_cast<char *>(&height), sizeof(height));
   ifs.read(reinterpret_cast<char *>(&width), sizeof(width));
   ifs.read(reinterpret_cast<char *>(&depth), sizeof(depth));
-  println_i(height, width, depth);
+
   matrix2<logical> mask(height, width);
   for (auto first = mask.begin(), last = mask.end(); first != last; ++first) {
     ifs.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
@@ -306,6 +309,7 @@ int process_sample(const std::string &path, std::vector<fp_t> &s,
     ifs.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
   }
   ifs.close();
+
   matrix3<uint8_t> sample_im = avg_folder<MAX_PICTURE>(
       path, AVG_FILE_NAME, Margin{left_off, right_off, top_off, bottom_off});
 

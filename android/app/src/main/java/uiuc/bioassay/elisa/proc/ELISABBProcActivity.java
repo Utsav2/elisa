@@ -33,7 +33,7 @@ public class ELISABBProcActivity extends AppCompatActivity {
 
         //tlcProcWorker.execute(getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA));
 
-        elisabbProcWorker.execute("/storage/sdcard0/Android/data/uiuc.bioassay.elisa/test/bb/");
+        elisabbProcWorker.execute("/storage/sdcard0/Android/data/uiuc.bioassay.elisa/test-elisa/bb/");
     }
 
     @Override
