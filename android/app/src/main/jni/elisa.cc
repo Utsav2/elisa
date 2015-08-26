@@ -84,7 +84,7 @@ void filter_points(std::vector<Point<fp_t>> &points, int n) {
                          }),
                points.end());
 }
- 
+
 template <typename T>
 fp_t fit_circle(const std::vector<Point<T>> &p, Circle &circle) {
   fp_t sum_x[3]{};  // Hold sum of x, sum of x^2, sum of x^3
@@ -141,8 +141,9 @@ fp_t fit_circle(const std::vector<Point<T>> &p, Circle &circle) {
 }
 
 template <typename ForwardIterator, typename OutputIt1, typename OutputIt2>
-inline void get_normalized_coeffs_and_mask(ForwardIterator first, ForwardIterator last,
-                      OutputIt1 mask_first, OutputIt2 d_first) {
+inline void
+get_normalized_coeffs_and_mask(ForwardIterator first, ForwardIterator last,
+                               OutputIt1 mask_first, OutputIt2 d_first) {
   while (first != last) {
     auto r = *first;
     auto g = *++first;
@@ -191,7 +192,7 @@ int process_bb(const std::string &path) noexcept {
     return std::min(255 * x, static_cast<fp_t>(255));
   });
   auto thresh = pctl_hist_thresh(h, 0.7) / 255;
- 
+
   auto mask = bb_gray >= thresh;
   std::vector<Rect> rects;
   bwlabel(mask, rects);
@@ -229,15 +230,16 @@ int process_bb(const std::string &path) noexcept {
                     (top_off - circle.yc) * (top_off - circle.yc));
   size_t col_end =
       ceil(sqrt(r_end * r_end - (0 - circle.yc) * (0 - circle.yc)) + circle.xc);
-	  
+
   size_t height = bb_roi.size(0);
   size_t width = bb_roi.size(1);
   size_t depth = bb_roi.size(2);
-  
+
   matrix3<fp_t> coeffs(bb_roi.descriptor());
   mask = matrix2<logical>(coeffs.size(0), coeffs.size(1));
-  get_normalized_coeffs_and_mask(bb_roi.begin(), bb_roi.end(), mask.begin(), coeffs.begin());
-  
+  get_normalized_coeffs_and_mask(bb_roi.begin(), bb_roi.end(), mask.begin(),
+                                 coeffs.begin());
+
   // Calculate broadband
   std::vector<fp_t> bg(col_end + 1);
   for (size_t i = 0; i < col_start; ++i) {
@@ -261,9 +263,9 @@ int process_bb(const std::string &path) noexcept {
     }
     bg[i] = bg_val;
   }
-  
+
   // Write result to file
-  std::fstream ofs_res(path + BB_DATA, std::ios::out | std::ios::binary);
+  std::fstream ofs_res(path + BB_RES, std::ios::out | std::ios::binary);
   if (!ofs_res.good()) {
     println_e("Couldn't open broadband result file to write");
     return -1;
@@ -319,28 +321,29 @@ int process_sample(const std::string &path, std::vector<fp_t> &s) noexcept {
   ifs.read(reinterpret_cast<char *>(&bottom_off), sizeof(bottom_off));
   ifs.read(reinterpret_cast<char *>(&col_start), sizeof(col_start));
   ifs.read(reinterpret_cast<char *>(&col_end), sizeof(col_end));
- 
+
   Circle circle;
   ifs.read(reinterpret_cast<char *>(&(circle.xc)), sizeof(circle.xc));
   ifs.read(reinterpret_cast<char *>(&(circle.yc)), sizeof(circle.yc));
- 
+
   size_t height;
   size_t width;
   size_t depth;
   ifs.read(reinterpret_cast<char *>(&height), sizeof(height));
   ifs.read(reinterpret_cast<char *>(&width), sizeof(width));
   ifs.read(reinterpret_cast<char *>(&depth), sizeof(depth));
- 
+
   matrix3<fp_t> coeffs(height, width, depth);
   for (auto first = coeffs.begin(), last = coeffs.end(); first != last;
        ++first) {
     ifs.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
   }
   ifs.close();
-  
+
   // Read broadband result file
   std::vector<fp_t> bg(col_end + 1);
-  std::fstream ifs_res(root + BB_FOLDER + BB_RES, std::ios::in | std::ios::binary);
+  std::fstream ifs_res(root + BB_FOLDER + BB_RES,
+                       std::ios::in | std::ios::binary);
   if (!ifs_res.good()) {
     println_e("Couldn't open broadband result file to read");
     return -1;
@@ -356,7 +359,7 @@ int process_sample(const std::string &path, std::vector<fp_t> &s) noexcept {
   matrix2<fp_t> f(height, width);
   get_normalized_data(sample_im.begin(), sample_im.end(), coeffs.begin(),
                       f.begin());
-  s.resize(col_end + 1)
+  s.resize(col_end + 1);
   for (size_t i = 0; i < col_start; ++i) {
     s[i] = 0;
   }

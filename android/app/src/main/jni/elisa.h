@@ -19,11 +19,11 @@ inline int process_bb(const char *path) noexcept {
   return process_bb(std::string(path));
 }
 
-int process_sample(const std::string &path, std::vector<imtoolbox::fp_t> &s,
-                   std::vector<imtoolbox::fp_t> &bg) noexcept;
-inline int process_sample(const char *path, std::vector<imtoolbox::fp_t> &s,
-                          std::vector<imtoolbox::fp_t> &bg) noexcept {
-  return process_sample(std::string(path), s, bg);
+int process_sample(const std::string &path,
+                   std::vector<imtoolbox::fp_t> &s) noexcept;
+inline int process_sample(const char *path,
+                          std::vector<imtoolbox::fp_t> &s) noexcept {
+  return process_sample(std::string(path), s);
 }
 } // namespace elisa
 #endif
