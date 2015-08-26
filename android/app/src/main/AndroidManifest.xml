@@ -45,10 +45,11 @@
         </activity>
         <activity
             android:name=".camera.CameraActivity"
-            android:label="@string/title_activity_camera" >
+            android:label="@string/title_activity_camera"
+            android:launchMode="singleInstance">
         </activity>
         <activity
-            android:name=".proc.ELISABBProcActivity"
+            android:name=".proc.BBProcActivity"
             android:label="@string/title_activity_tlcproc" >
         </activity>
 

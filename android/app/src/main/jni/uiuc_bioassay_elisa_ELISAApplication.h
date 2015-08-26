@@ -23,18 +23,18 @@ JNIEXPORT void JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_cleanFolder
 
 /*
  * Class:     uiuc_bioassay_elisa_ELISAApplication
- * Method:    processBBELISA
- * Signature: (Ljava/lang/String;)[D
+ * Method:    processBB
+ * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processBBELISA
+JNIEXPORT jint JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processBB
   (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     uiuc_bioassay_elisa_ELISAApplication
- * Method:    processSampleELISA
- * Signature: (Ljava/lang/String;)[D
+ * Method:    processSample
+ * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processSampleELISA
+JNIEXPORT jint JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processSample
   (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus

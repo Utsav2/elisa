@@ -50,6 +50,6 @@ public class ELISAApplication extends Application {
 
     /* Native signatures */
     public native static void cleanFolder(String folder);
-    public native static double[] processBBELISA(String folder);
-    public native static double[] processSampleELISA(String folder);
+    public native static int processBB(String folder);
+    public native static int processSample(String folder);
 }

@@ -21,17 +21,17 @@ import uiuc.bioassay.elisa.R;
 import uiuc.bioassay.elisa.services.NetworkService;
 
 import static uiuc.bioassay.elisa.ELISAApplication.AVG_FILE_NAME;
-import static uiuc.bioassay.elisa.ELISAApplication.processBBELISA;
+import static uiuc.bioassay.elisa.ELISAApplication.processBB;
 
 /**
  * Created by meowle on 7/8/15.
  */
-public class ELISABBProcWorker extends AsyncTask<String, Void, double[]> {
+public class BBProcWorker extends AsyncTask<String, Void, Integer> {
     private Context mContext;
     private ProgressDialog progressDialog;
     private String folder;
 
-    public ELISABBProcWorker(Context context) {
+    public BBProcWorker(Context context) {
         mContext = context;
         progressDialog = new ProgressDialog(context);
     }
@@ -46,23 +46,23 @@ public class ELISABBProcWorker extends AsyncTask<String, Void, double[]> {
     }
 
     @Override
-    protected double[] doInBackground(String... params) {
+    protected Integer doInBackground(String... params) {
         folder = params[0];
-        return processBBELISA(folder + File.separator);
+        return processBB(folder + File.separator);
     }
 
     @Override
-    protected void onPostExecute(final double[] spots) {
+    protected void onPostExecute(Integer result) {
         progressDialog.dismiss();
-        for (int i = 0; i < ELISAApplication.MAX_PICTURE; ++i) {
-            NetworkService.startActionUpload(mContext, folder + File.separator + ELISAApplication.BB_FOLDER + AVG_FILE_NAME);
-            //NetworkService.startActionUpload(mContext, folder + File.separator + LOG_FILE);
-        }
-        if (spots == null) {
+        Activity activity = (Activity) mContext;
+        BBProcActivity bbProcActivity = (BBProcActivity) activity;
+        if (bbProcActivity == null) {
             return;
         }
-        Activity activity = (Activity) mContext;
-        if (activity == null) {
+        if (result == -1) {
+            TextView textView = (TextView) bbProcActivity.findViewById(R.id.text_result);
+            textView.setText("Error, unable to process data!");
+            bbProcActivity.setCurrResult(-1);
             return;
         }
     }

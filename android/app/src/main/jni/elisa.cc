@@ -229,15 +229,54 @@ int process_bb(const std::string &path) noexcept {
                     (top_off - circle.yc) * (top_off - circle.yc));
   size_t col_end =
       ceil(sqrt(r_end * r_end - (0 - circle.yc) * (0 - circle.yc)) + circle.xc);
-
+	  
+  size_t height = bb_roi.size(0);
+  size_t width = bb_roi.size(1);
+  size_t depth = bb_roi.size(2);
+  
   matrix3<fp_t> coeffs(bb_roi.descriptor());
   mask = matrix2<logical>(coeffs.size(0), coeffs.size(1));
   get_normalized_coeffs_and_mask(bb_roi.begin(), bb_roi.end(), mask.begin(), coeffs.begin());
+  
+  // Calculate broadband
+  std::vector<fp_t> bg(col_end + 1);
+  for (size_t i = 0; i < col_start; ++i) {
+    bg[i] = 0;
+  }
+  size_t y_start = top_off;
+  size_t y_end = top_off + height - 1;
+  for (size_t i = col_start; i <= col_end; ++i) {
+    fp_t R = sqrt((i - circle.xc) * (i - circle.xc) +
+                  (0 - circle.yc) * (0 - circle.yc));
+    fp_t bg_val = 0;
+    for (size_t y = y_start; y <= y_end; ++y) {
+      fp_t x = sqrt(R * R - (y - circle.yc) * (y - circle.yc)) + circle.xc -
+               left_off;
+      if (x >= 0 && x < width - 1) {
+        auto x1 = floor(x);
+        auto p = x - x1;
+        bg_val +=
+            (1 - p) * mask(y - top_off, x1) + p * mask(y - top_off, x1 + 1);
+      }
+    }
+    bg[i] = bg_val;
+  }
+  
+  // Write result to file
+  std::fstream ofs_res(path + BB_DATA, std::ios::out | std::ios::binary);
+  if (!ofs_res.good()) {
+    println_e("Couldn't open broadband result file to write");
+    return -1;
+  }
+  for (auto first = bg.begin(), last = bg.end(); first != last; ++first) {
+    ofs_res.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
+  }
+  ofs_res.close();
 
-  /* Write to file */
+  // Write to file
   std::fstream ofs(path + BB_DATA, std::ios::out | std::ios::binary);
   if (!ofs.good()) {
-    println_e("Couldn't open broadband file to read");
+    println_e("Couldn't open broadband file to write");
     return -1;
   }
   ofs.write(reinterpret_cast<char *>(&top_off), sizeof(top_off));
@@ -246,15 +285,9 @@ int process_bb(const std::string &path) noexcept {
   ofs.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
   ofs.write(reinterpret_cast<char *>(&(circle.xc)), sizeof(circle.xc));
   ofs.write(reinterpret_cast<char *>(&(circle.yc)), sizeof(circle.yc));
-  size_t height = coeffs.size(0);
-  size_t width = coeffs.size(1);
-  size_t depth = coeffs.size(2);
   ofs.write(reinterpret_cast<char *>(&height), sizeof(height));
   ofs.write(reinterpret_cast<char *>(&width), sizeof(width));
   ofs.write(reinterpret_cast<char *>(&depth), sizeof(depth));
-  for (auto first = mask.begin(), last = mask.end(); first != last; ++first) {
-    ofs.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
-  }
   for (auto first = coeffs.begin(), last = coeffs.end(); first != last;
        ++first) {
     ofs.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
@@ -263,8 +296,7 @@ int process_bb(const std::string &path) noexcept {
   return 0;
 }
 
-int process_sample(const std::string &path, std::vector<fp_t> &s,
-                   std::vector<fp_t> &bg) noexcept {
+int process_sample(const std::string &path, std::vector<fp_t> &s) noexcept {
   size_t pos = path.length() - 1;
   if (path[pos] == '/') {
     --pos;
@@ -273,6 +305,7 @@ int process_sample(const std::string &path, std::vector<fp_t> &s,
     --pos;
   }
   auto root = path.substr(0, pos + 1);
+  // Read broadband data file
   std::fstream ifs(root + BB_FOLDER + BB_DATA, std::ios::in | std::ios::binary);
   if (!ifs.good()) {
     println_e("Couldn't open broadband file to read");
@@ -297,18 +330,25 @@ int process_sample(const std::string &path, std::vector<fp_t> &s,
   ifs.read(reinterpret_cast<char *>(&height), sizeof(height));
   ifs.read(reinterpret_cast<char *>(&width), sizeof(width));
   ifs.read(reinterpret_cast<char *>(&depth), sizeof(depth));
-
-  matrix2<logical> mask(height, width);
-  for (auto first = mask.begin(), last = mask.end(); first != last; ++first) {
-    ifs.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
-  }
-  
+ 
   matrix3<fp_t> coeffs(height, width, depth);
   for (auto first = coeffs.begin(), last = coeffs.end(); first != last;
        ++first) {
     ifs.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
   }
   ifs.close();
+  
+  // Read broadband result file
+  std::vector<fp_t> bg(col_end + 1);
+  std::fstream ifs_res(root + BB_FOLDER + BB_RES, std::ios::in | std::ios::binary);
+  if (!ifs_res.good()) {
+    println_e("Couldn't open broadband result file to read");
+    return -1;
+  }
+  for (auto first = bg.begin(), last = bg.end(); first != last; ++first) {
+    ifs_res.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
+  }
+  ifs_res.close();
 
   matrix3<uint8_t> sample_im = avg_folder<MAX_PICTURE>(
       path, AVG_FILE_NAME, Margin{left_off, right_off, top_off, bottom_off});
@@ -316,9 +356,9 @@ int process_sample(const std::string &path, std::vector<fp_t> &s,
   matrix2<fp_t> f(height, width);
   get_normalized_data(sample_im.begin(), sample_im.end(), coeffs.begin(),
                       f.begin());
+  s.resize(col_end + 1)
   for (size_t i = 0; i < col_start; ++i) {
-    s.push_back(0);
-    bg.push_back(0);
+    s[i] = 0;
   }
   size_t y_start = top_off;
   size_t y_end = top_off + height - 1;
@@ -326,7 +366,6 @@ int process_sample(const std::string &path, std::vector<fp_t> &s,
     fp_t R = sqrt((i - circle.xc) * (i - circle.xc) +
                   (0 - circle.yc) * (0 - circle.yc));
     fp_t s_val = 0;
-    fp_t bg_val = 0;
     for (size_t y = y_start; y <= y_end; ++y) {
       fp_t x = sqrt(R * R - (y - circle.yc) * (y - circle.yc)) + circle.xc -
                left_off;
@@ -334,12 +373,9 @@ int process_sample(const std::string &path, std::vector<fp_t> &s,
         auto x1 = floor(x);
         auto p = x - x1;
         s_val += (1 - p) * f(y - top_off, x1) + p * f(y - top_off, x1 + 1);
-        bg_val +=
-            (1 - p) * mask(y - top_off, x1) + p * mask(y - top_off, x1 + 1);
       }
     }
-    s.push_back(s_val);
-    bg.push_back(bg_val);
+    s[i] = s_val;
   }
   for (size_t i = 0; i < bg.size(); ++i) {
     if (!almost_equal(bg[i], static_cast<fp_t>(0))) {

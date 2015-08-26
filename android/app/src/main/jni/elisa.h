@@ -11,6 +11,7 @@ constexpr uint8_t thr_noise = 20;
 constexpr const char *BB_FOLDER = "bb/";
 constexpr const char *AVG_FILE_NAME = "avg.jpg";
 constexpr const char *BB_DATA = "bb.bin";
+constexpr const char *BB_RES = "bb_res.bin";
 constexpr size_t MAX_PICTURE = 4;
 
 int process_bb(const std::string &path) noexcept;

@@ -76,7 +76,7 @@ import java.util.Date;
 
 import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
-import uiuc.bioassay.elisa.proc.ELISABBProcActivity;
+import uiuc.bioassay.elisa.proc.BBProcActivity;
 
 @SuppressWarnings("deprecation")
 public class CameraActivity extends AppCompatActivity implements
@@ -127,7 +127,7 @@ public class CameraActivity extends AppCompatActivity implements
                     if (isBroadBand) {
                         currentFolder = rootFolder + File.separator + ELISAApplication.BB_FOLDER;
                         exportLocationToFile();
-                        Intent intent = new Intent(CameraActivity.this, ELISABBProcActivity.class);
+                        Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, rootFolder);
                         startActivity(intent);
                         finish();

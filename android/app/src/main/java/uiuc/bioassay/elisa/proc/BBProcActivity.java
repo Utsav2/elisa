@@ -7,19 +7,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
 
-public class ELISABBProcActivity extends AppCompatActivity {
-    private double[] currResult;
+public class BBProcActivity extends AppCompatActivity {
+    private int currResult;
 
-    public void setCurrResult(double[] result) {
+    public void setCurrResult(int result) {
         currResult = result;
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tlcproc);
+        setContentView(R.layout.activity_bbproc);
         Button done = (Button) findViewById(R.id.done);
         done.setOnClickListener(
                 new View.OnClickListener() {
@@ -29,11 +28,11 @@ public class ELISABBProcActivity extends AppCompatActivity {
                     }
                 }
         );
-        ELISABBProcWorker elisabbProcWorker = new ELISABBProcWorker(this);
+        BBProcWorker bbProcWorker = new BBProcWorker(this);
 
         //tlcProcWorker.execute(getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA));
 
-        elisabbProcWorker.execute("/storage/sdcard0/Android/data/uiuc.bioassay.elisa/test-elisa/bb/");
+        bbProcWorker.execute("/storage/sdcard0/Android/data/uiuc.bioassay.elisa/test-elisa/bb/");
     }
 
     @Override
