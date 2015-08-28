@@ -20,6 +20,8 @@ public class ELISAApplication extends Application {
     public static final String FOLDER_EXTRA = "FOLDER_EXTRA";
     public static final String ROOT_FOLDER = Environment.getExternalStorageDirectory() + "/Android/data/uiuc.bioassay.elisa";
     public static final String ACTION_BROADBAND = "BROADBAND";
+    public static final String ACTION_ONE_SAMPLE = "ONE_SAMPLE";
+    public static final String ACTION_MULTIPLE_SAMPLE = "MULTIPLE_SAMPLE";
 
     public static double RED_LASER_PEAK = 1016.037828;
     public static double GREEN_LASER_PEAK = 1443.327951;
@@ -32,8 +34,10 @@ public class ELISAApplication extends Application {
     // If you change the following constants, remmember to change in elisa.h as well
     public static final String AVG_FILE_NAME = "avg.jpg";
     public static final String LOG_FILE = "log.txt";
-    public static final String BB_FOLDER = "bg/";
-    public static final String SAMPLE_FOLDER = "sample/";
+    public static final String BB_FOLDER = "bb";
+    public static final String SAMPLE_FOLDER = "sample";
+    public static final String RES = "res.bin";
+    public static final String RGB_SPEC = "rgb.bin";
     public static final int MAX_PICTURE = 8;
     /*----------------------------------------------------------------------------*/
 
@@ -52,4 +56,7 @@ public class ELISAApplication extends Application {
     public native static void cleanFolder(String folder);
     public native static int processBB(String folder);
     public native static int processSample(String folder);
+    public native static double[] readRGBSpec(String folder);
+    public native static double[] readBBResNormalized(String folder);
+    public native static double[] readSampleResNormalized(String folder);
 }

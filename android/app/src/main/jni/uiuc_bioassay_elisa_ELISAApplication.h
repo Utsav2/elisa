@@ -37,6 +37,30 @@ JNIEXPORT jint JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processBB
 JNIEXPORT jint JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processSample
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     uiuc_bioassay_elisa_ELISAApplication
+ * Method:    readRGBSpec
+ * Signature: (Ljava/lang/String;)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_readRGBSpec
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     uiuc_bioassay_elisa_ELISAApplication
+ * Method:    readBBResNormalized
+ * Signature: (Ljava/lang/String;)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_readBBResNormalized
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     uiuc_bioassay_elisa_ELISAApplication
+ * Method:    readSampleResNormalized
+ * Signature: (Ljava/lang/String;)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_readSampleResNormalized
+  (JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

@@ -9,6 +9,7 @@ import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Gravity;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -62,8 +63,23 @@ public class BBProcWorker extends AsyncTask<String, Void, Integer> {
         if (result == -1) {
             TextView textView = (TextView) bbProcActivity.findViewById(R.id.text_result);
             textView.setText("Error, unable to process data!");
-            bbProcActivity.setCurrResult(-1);
+            bbProcActivity.setCurrResult(result);
             return;
         }
+        ImageView imageView = (ImageView) bbProcActivity.findViewById(R.id.imageView);
+        imageView.setImageBitmap(decodeIMG(folder + File.separator + AVG_FILE_NAME));
+
+        Button button = (Button) bbProcActivity.findViewById(R.id.image_button);
+        button.setEnabled(false);
+        bbProcActivity.setResult(result);
+    }
+
+    private static Bitmap decodeIMG(String img) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 4;
+        Bitmap bitmap = BitmapFactory.decodeFile(img, options);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 }

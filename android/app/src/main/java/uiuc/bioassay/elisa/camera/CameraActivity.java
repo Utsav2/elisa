@@ -58,6 +58,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -77,6 +78,7 @@ import java.util.Date;
 import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
 import uiuc.bioassay.elisa.proc.BBProcActivity;
+import uiuc.bioassay.elisa.proc.SampleProcActivity;
 
 @SuppressWarnings("deprecation")
 public class CameraActivity extends AppCompatActivity implements
@@ -87,9 +89,8 @@ public class CameraActivity extends AppCompatActivity implements
     private CameraPreview mPreview;
     private FrameLayout preview;
     private Button buttonCapture;
-    private String rootFolder;
-    private String currentFolder;
-    private boolean isBroadBand;
+    private String folder;
+    private String action;
     private TextView instructions;
     private TextView title;
 
@@ -99,8 +100,7 @@ public class CameraActivity extends AppCompatActivity implements
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-
-            File pictureFile = getOutputImageFile(currentFolder, picCount);
+            File pictureFile = getOutputImageFile(folder, picCount);
             Log.d(TAG, pictureFile.getAbsolutePath());
             if (pictureFile == null){
                 Log.d(TAG, "Error creating media file, check storage permissions: ");
@@ -116,7 +116,7 @@ public class CameraActivity extends AppCompatActivity implements
 
                 // Take more pictures if still
                 ++picCount;
-                camera.startPreview();
+                //camera.startPreview();
                 if (picCount < ELISAApplication.MAX_PICTURE) {
                     mCamera.takePicture(null, null,
                             mPicture);
@@ -124,14 +124,17 @@ public class CameraActivity extends AppCompatActivity implements
                     stopSeriesSound.play();
                     picCount = 0;
                     buttonCapture.setEnabled(true);
-                    if (isBroadBand) {
-                        currentFolder = rootFolder + File.separator + ELISAApplication.BB_FOLDER;
+                    setResult(RESULT_OK);
+                    if (action.equals(ELISAApplication.ACTION_BROADBAND)) {
                         exportLocationToFile();
                         Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
-                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, rootFolder);
+                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                         startActivity(intent);
-                        finish();
-                    } else {
+                    } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE)){
+                        exportLocationToFile();
+                        Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
+                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
+                        startActivity(intent);
                     }
                 }
             } catch (FileNotFoundException e) {
@@ -140,6 +143,9 @@ public class CameraActivity extends AppCompatActivity implements
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
             } catch (Exception e) {
                 Log.d(TAG, "Error starting preview: " + e.getMessage());
+                Toast.makeText(CameraActivity.this, "Error starting preview: " + e.getMessage(), Toast.LENGTH_LONG);
+                picCount = 0;
+                buttonCapture.setEnabled(true);
             }
         }
     };
@@ -187,9 +193,11 @@ public class CameraActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        rootFolder = getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA);
-        currentFolder = rootFolder + File.separator + ELISAApplication.SAMPLE_FOLDER;
-        // Open elisa
+        folder = getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA);
+        action = getIntent().getAction();
+        Log.d(TAG, folder);
+        Log.d(TAG, action);
+        // Open camera
         openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
 
         // Set onClickListener for taking picture
@@ -210,7 +218,6 @@ public class CameraActivity extends AppCompatActivity implements
 
         instructions = (TextView) findViewById(R.id.instructions);
         title = (TextView) findViewById(R.id.camera_title);
-        isBroadBand = (getIntent().getAction() == ELISAApplication.ACTION_BROADBAND) ? true : false;
 
         mLastUpdateTime = "";
 
@@ -220,6 +227,12 @@ public class CameraActivity extends AppCompatActivity implements
         // Kick off the process of building a GoogleApiClient and requesting the LocationServices
         // API.
         buildGoogleApiClient();
+    }
+
+    protected void onNewIntent (Intent intent) {
+        folder = intent.getStringExtra(ELISAApplication.FOLDER_EXTRA);
+        Log.d(TAG, folder);
+        action = intent.getAction();
     }
 
     /**
@@ -399,8 +412,10 @@ public class CameraActivity extends AppCompatActivity implements
         if (mCamera == null) {
             openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
         }
-        if (isBroadBand) {
+        if (action.equals(ELISAApplication.ACTION_BROADBAND)) {
             title.setText("Broadband Screen");
+        } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE) || action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+            title.setText("Sample Screen");
         }
     }
 
@@ -638,7 +653,7 @@ public class CameraActivity extends AppCompatActivity implements
         //        Toast.LENGTH_LONG).show();
         BufferedWriter out = null;
         try {
-            FileWriter fstream = new FileWriter(rootFolder + File.separator + ELISAApplication.LOG_FILE, true); //true tells to append data.
+            FileWriter fstream = new FileWriter(folder + File.separator + ELISAApplication.LOG_FILE, true); //true tells to append data.
             out = new BufferedWriter(fstream);
             if (mCurrentLocation == null) {
                 out.write("Location: unknown");

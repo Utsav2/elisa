@@ -48,9 +48,15 @@
             android:label="@string/title_activity_camera"
             android:launchMode="singleInstance">
         </activity>
+
         <activity
             android:name=".proc.BBProcActivity"
-            android:label="@string/title_activity_tlcproc" >
+            android:label="@string/title_activity_bb_proc" >
+        </activity>
+
+        <activity
+            android:name=".proc.SampleProcActivity"
+            android:label="@string/title_activity_sample_proc" >
         </activity>
 
         <service

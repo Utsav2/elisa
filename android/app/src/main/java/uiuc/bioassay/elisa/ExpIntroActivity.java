@@ -33,12 +33,23 @@ import static uiuc.bioassay.elisa.ELISAApplication.cleanFolder;
 public class ExpIntroActivity extends AppCompatActivity {
     private static final String TAG = "INTRO";
     private File folder;
+    private EditText expName;
+    private EditText expDay;
+    /*
+    private EditText userID;
+    private EditText userName;
+    private EditText phoneNumber;
+    private EditText drugINN;
+    private EditText lotNumber;
+    private EditText expireDay;
+    private EditText phoneID;*/
     private EditText editText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exp_intro);
-        final EditText expName = (EditText) findViewById(R.id.exp_name);
+        expName = (EditText) findViewById(R.id.exp_name);
 
         expName.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
@@ -55,7 +66,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
-        final EditText expDay = (EditText) findViewById(R.id.exp_day);
+        expDay = (EditText) findViewById(R.id.exp_day);
         expDay.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -96,7 +107,7 @@ public class ExpIntroActivity extends AppCompatActivity {
         );
 
         /*
-        final EditText userID = (EditText) findViewById(R.id.user_ID);
+        userID = (EditText) findViewById(R.id.user_ID);
         userID.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -111,7 +122,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
-        final EditText userName = (EditText) findViewById(R.id.user_name);
+        userName = (EditText) findViewById(R.id.user_name);
         userName.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -126,7 +137,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
-        final EditText phoneNumber = (EditText) findViewById(R.id.phone_number);
+        phoneNumber = (EditText) findViewById(R.id.phone_number);
         phoneNumber.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -141,7 +152,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
-        final EditText drugINN = (EditText) findViewById(R.id.drug_inn);
+        drugINN = (EditText) findViewById(R.id.drug_inn);
         drugINN.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -156,7 +167,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
-        final EditText lotNumber = (EditText) findViewById(R.id.lot_number);
+        lotNumber = (EditText) findViewById(R.id.lot_number);
         lotNumber.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -171,7 +182,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
-        final EditText expireDay = (EditText) findViewById(R.id.expire_day);
+        expireDay = (EditText) findViewById(R.id.expire_day);
         expireDay.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -211,7 +222,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 }
         );
 
-        final EditText phoneID = (EditText) findViewById(R.id.phone_id);
+        phoneID = (EditText) findViewById(R.id.phone_id);
         phoneID.setOnFocusChangeListener(
                 new View.OnFocusChangeListener() {
                     @Override
@@ -233,14 +244,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                 switch (which){
                     case DialogInterface.BUTTON_POSITIVE:
                         cleanFolder(folder.getAbsolutePath());
-                        exportToFile(expName.getText().toString(), expDay.getText().toString()/*, userID.getText().toString(), userName.getText().toString(),
-                                phoneNumber.getText().toString(), drugINN.getText().toString(), lotNumber.getText().toString(), expireDay.getText().toString(),
-                                phoneID.getText().toString()*/);
-                        Intent intent = new Intent(ExpIntroActivity.this, CameraActivity.class);
-                        intent.setAction(ELISAApplication.ACTION_BROADBAND);
-                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath());
-                        startActivity(intent);
-                        finish();
+                        startExperiment();
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
@@ -258,6 +262,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                         editText.requestFocus();
                     }
                 });
+
         expNext.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -297,7 +302,8 @@ public class ExpIntroActivity extends AppCompatActivity {
                             alertDialog.show();
                             editText = expireDay;
                             return;
-                        } */
+                        }*/
+
                         folder = new File(ELISAApplication.ROOT_FOLDER, expName.getText().toString());
                         if (folder.exists()) {
                             final AlertDialog.Builder builder = new AlertDialog.Builder(ExpIntroActivity.this);
@@ -305,30 +311,65 @@ public class ExpIntroActivity extends AppCompatActivity {
                                     .setMessage("Experiment name exists. Are you sure you want to overwrite it?")
                                     .setPositiveButton("Yes", dialogClickListener)
                                     .setNegativeButton("No", dialogClickListener);
-                            AlertDialog alertDialog = builder.show();
+                            AlertDialog warningDialog = builder.show();
                             // Set title divider color
                             int titleDividerId = getResources().getIdentifier("titleDivider", "id", "android");
-                            View titleDivider = alertDialog.findViewById(titleDividerId);
+                            View titleDivider = warningDialog.findViewById(titleDividerId);
                             if (titleDivider != null)
                                 titleDivider.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
                         } else if (!folder.mkdirs()) {
                             Toast.makeText(ExpIntroActivity.this, "Cannot create folder", Toast.LENGTH_LONG).show();
-                            return;
                         } else {
-                            exportToFile(expName.getText().toString(), expDay.getText().toString()/*, userID.getText().toString(), userName.getText().toString(),
-                                    phoneNumber.getText().toString(), drugINN.getText().toString(), lotNumber.getText().toString(), expireDay.getText().toString(),
-                                    phoneID.getText().toString()*/);
-                            Intent intent = new Intent(ExpIntroActivity.this, CameraActivity.class);
-                            intent.setAction(ELISAApplication.ACTION_BROADBAND);
-                            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath());
-                            startActivity(intent);
-                            finish();
+                            startExperiment();
                         }
                     }
                 }
         );
     }
 
+    private String getText(EditText editText) {
+        String s = editText.getText().toString();
+        return (s.equals("") ? "N/A" : s);
+    }
+    private void startExperiment() {
+        // Show confirmation
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        exportInfoToFile();
+                        Intent intent = new Intent(ExpIntroActivity.this, CameraActivity.class);
+                        intent.setAction(ELISAApplication.ACTION_BROADBAND);
+                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath() + File.separator + ELISAApplication.BB_FOLDER);
+                        startActivity(intent);
+                        finish();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(ExpIntroActivity.this);
+        builder.setTitle("Confirm").setMessage("Experiment Information: " + "\n  - Name : " + getText(expName) +
+                "\n  - Day : " + getText(expDay) /*+
+                "\n  - User ID : " + getText(userID) +
+                "\n  - User Name : " + getText(userName) +
+                "\n  - Phone Number : " + getText(phoneNumber) +
+                "\n  - Drug INN : " + getText(drugINN) +
+                "\n  - Lot Number : " + getText(lotNumber) +
+                "\n  - Expire Day : " + getText(expireDay) +
+                "\n  - Phone ID : " + getText(phoneID)*/)
+                .setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
+
+    }
+
+    @Override
+    public void onBackPressed() {
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -353,22 +394,22 @@ public class ExpIntroActivity extends AppCompatActivity {
 
 
 
-    private void exportToFile(String expName, String expDay/*, String userID, String userName, String phoneNumber, String drugINN, String lotNumber, String expireDay, String phoneID*/) {
+    private void exportInfoToFile() {
         BufferedWriter out = null;
         try
         {
             FileWriter fstream = new FileWriter(folder.getAbsolutePath() + File.separator + ELISAApplication.LOG_FILE, true); //true tells to append data.
             out = new BufferedWriter(fstream);
-            out.write("Experiment Name: " + expName + "\n");
-            out.write("Experiment Day: " + expDay + "\n");
+            out.write("Experiment Name: " + getText(expName) + "\r\n");
+            out.write("Experiment Day: " + getText(expDay) + "\r\n");
             /*
-            out.write("User ID: " + userID + "\n");
-            out.write("User Name: " + userName + "\n");
-            out.write("Phone Number: " + phoneNumber + "\n");
-            out.write("Drug Name (INN): " + drugINN + "\n");
-            out.write("Lot Number: " + lotNumber + "\n");
-            out.write("Expiration Day: " + expireDay + "\n");
-            out.write("Phone ID: " + phoneID + "\n");*/
+            out.write("User ID: " + getText(userID) + "\r\n");
+            out.write("User Name: " + getText(userName) + "\r\n");
+            out.write("Phone Number: " + getText(phoneNumber) + "\r\n");
+            out.write("Drug Name (INN): " + getText(drugINN) + "\r\n");
+            out.write("Lot Number: " + getText(lotNumber) + "\r\n");
+            out.write("Expiration Day: " + getText(expireDay) + "\r\n");
+            out.write("Phone ID: " + getText(phoneID) + "\r\n");*/
             out.flush();
         }
         catch (IOException e)
