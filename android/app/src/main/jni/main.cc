@@ -9,7 +9,6 @@ int main(int argc, char *argv[]) {
   if (elisa::process_bb("test/bb/") != 0) {
     return -1;
   }
-  std::vector<fp_t> s;
-  elisa::process_sample("test/sample/", s);
+  elisa::process_sample("test/sample/");
   return 0;
 }

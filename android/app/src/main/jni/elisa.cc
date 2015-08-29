@@ -246,12 +246,12 @@ int process_bb(const std::string &path) noexcept {
   std::vector<fp_t> red(col_end);
   std::vector<fp_t> green(col_end);
   std::vector<fp_t> blue(col_end);
-  
+
   for (size_t i = 0; i < col_start; ++i) {
     bg[i] = 0;
-	red[i] = 0;
-	green[i] = 0;
-	blue[i] = 0;
+    red[i] = 0;
+    green[i] = 0;
+    blue[i] = 0;
   }
   size_t y_start = top_off;
   size_t y_end = top_off + height - 1;
@@ -259,9 +259,9 @@ int process_bb(const std::string &path) noexcept {
     fp_t R = sqrt((i - circle.xc) * (i - circle.xc) +
                   (0 - circle.yc) * (0 - circle.yc));
     fp_t bg_val = 0;
-	fp_t red_val = 0;
-	fp_t green_val = 0;
-	fp_t blue_val = 0;
+    fp_t red_val = 0;
+    fp_t green_val = 0;
+    fp_t blue_val = 0;
     for (size_t y = y_start; y <= y_end; ++y) {
       fp_t x = sqrt(R * R - (y - circle.yc) * (y - circle.yc)) + circle.xc -
                left_off;
@@ -270,18 +270,18 @@ int process_bb(const std::string &path) noexcept {
         auto p = x - x1;
         bg_val +=
             (1 - p) * mask(y - top_off, x1) + p * mask(y - top_off, x1 + 1);
-		red_val +=
-            (1 - p) * bb_roi(y - top_off, x1, 0) + p * bb_roi(y - top_off, x1 + 1, 0);
-		green_val +=
-            (1 - p) * bb_roi(y - top_off, x1, 1) + p * bb_roi(y - top_off, x1 + 1, 1);
-		blue_val +=
-            (1 - p) * bb_roi(y - top_off, x1, 2) + p * bb_roi(y - top_off, x1 + 1, 2);
+        red_val += (1 - p) * bb_roi(y - top_off, x1, 0) +
+                   p * bb_roi(y - top_off, x1 + 1, 0);
+        green_val += (1 - p) * bb_roi(y - top_off, x1, 1) +
+                     p * bb_roi(y - top_off, x1 + 1, 1);
+        blue_val += (1 - p) * bb_roi(y - top_off, x1, 2) +
+                    p * bb_roi(y - top_off, x1 + 1, 2);
       }
     }
     bg[i] = bg_val;
-	red[i] = red_val;
-	green[i] = green_val;
-	blue[i] = blue_val;
+    red[i] = red_val;
+    green[i] = green_val;
+    blue[i] = blue_val;
   }
 
   // Write rgb spectrum to file
@@ -290,23 +290,23 @@ int process_bb(const std::string &path) noexcept {
     println_e("Couldn't open broadband rgb spectrum file to write");
     return -1;
   }
-  
+
   ofs_rgb_spec.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
   auto first_r = red.begin();
   auto last_r = red.end();
   auto first_g = green.begin();
   auto first_b = blue.begin();
-  
+
   while (first_r != last_r) {
     ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_r)), sizeof(*first_r));
-	ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_g)), sizeof(*first_g));
-	ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_b)), sizeof(*first_b));
-	++first_r;
-	++first_g;
-	++first_b;
+    ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_g)), sizeof(*first_g));
+    ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_b)), sizeof(*first_b));
+    ++first_r;
+    ++first_g;
+    ++first_b;
   }
   ofs_rgb_spec.close();
- 
+
   // Write result to file
   std::fstream ofs_res(path + RES, std::ios::out | std::ios::binary);
   if (!ofs_res.good()) {
@@ -385,13 +385,13 @@ int process_sample(const std::string &path) noexcept {
   ifs.close();
 
   // Read broadband result file
-  std::vector<fp_t> bg(col_end);
-  std::fstream ifs_res(root + BB_FOLDER + RES,
-                       std::ios::in | std::ios::binary);
+  std::fstream ifs_res(root + BB_FOLDER + RES, std::ios::in | std::ios::binary);
   if (!ifs_res.good()) {
     println_e("Couldn't open broadband result file to read");
     return -1;
   }
+  ifs_res.read(reinterpret_cast<char *>(&col_end), sizeof(col_end));
+  std::vector<fp_t> bg(col_end);
   for (auto first = bg.begin(), last = bg.end(); first != last; ++first) {
     ifs_res.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
   }
@@ -403,16 +403,16 @@ int process_sample(const std::string &path) noexcept {
   matrix2<fp_t> f(height, width);
   get_normalized_data(sample_im.begin(), sample_im.end(), coeffs.begin(),
                       f.begin());
-					  
+
   std::vector<fp_t> s(col_end);
   std::vector<fp_t> red(col_end);
   std::vector<fp_t> green(col_end);
   std::vector<fp_t> blue(col_end);
   for (size_t i = 0; i < col_start; ++i) {
     s[i] = 0;
-	red[i] = 0;
-	green[i] = 0;
-	blue[i] = 0;
+    red[i] = 0;
+    green[i] = 0;
+    blue[i] = 0;
   }
   size_t y_start = top_off;
   size_t y_end = top_off + height - 1;
@@ -420,9 +420,9 @@ int process_sample(const std::string &path) noexcept {
     fp_t R = sqrt((i - circle.xc) * (i - circle.xc) +
                   (0 - circle.yc) * (0 - circle.yc));
     fp_t s_val = 0;
-	fp_t red_val = 0;
-	fp_t green_val = 0;
-	fp_t blue_val = 0;
+    fp_t red_val = 0;
+    fp_t green_val = 0;
+    fp_t blue_val = 0;
     for (size_t y = y_start; y <= y_end; ++y) {
       fp_t x = sqrt(R * R - (y - circle.yc) * (y - circle.yc)) + circle.xc -
                left_off;
@@ -430,43 +430,43 @@ int process_sample(const std::string &path) noexcept {
         auto x1 = floor(x);
         auto p = x - x1;
         s_val += (1 - p) * f(y - top_off, x1) + p * f(y - top_off, x1 + 1);
-		red_val +=
-            (1 - p) * sample_im(y - top_off, x1, 0) + p * sample_im(y - top_off, x1 + 1, 0);
-		green_val +=
-            (1 - p) * sample_im(y - top_off, x1, 1) + p * sample_im(y - top_off, x1 + 1, 1);
-		blue_val +=
-            (1 - p) * sample_im(y - top_off, x1, 2) + p * sample_im(y - top_off, x1 + 1, 2);
+        red_val += (1 - p) * sample_im(y - top_off, x1, 0) +
+                   p * sample_im(y - top_off, x1 + 1, 0);
+        green_val += (1 - p) * sample_im(y - top_off, x1, 1) +
+                     p * sample_im(y - top_off, x1 + 1, 1);
+        blue_val += (1 - p) * sample_im(y - top_off, x1, 2) +
+                    p * sample_im(y - top_off, x1 + 1, 2);
       }
     }
     s[i] = s_val;
-	red[i] = red_val;
-	green[i] = green_val;
-	blue[i] = blue_val;
+    red[i] = red_val;
+    green[i] = green_val;
+    blue[i] = blue_val;
   }
-  
+
   // Write rgb spectrum to file
   std::fstream ofs_rgb_spec(path + RGB_SPEC, std::ios::out | std::ios::binary);
   if (!ofs_rgb_spec.good()) {
     println_e("Couldn't open broadband rgb spectrum file to write");
     return -1;
   }
-  
+
   ofs_rgb_spec.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
   auto first_r = red.begin();
   auto last_r = red.end();
   auto first_g = green.begin();
   auto first_b = blue.begin();
-  
+
   while (first_r != last_r) {
     ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_r)), sizeof(*first_r));
-	ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_g)), sizeof(*first_g));
-	ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_b)), sizeof(*first_b));
-	++first_r;
-	++first_g;
-	++first_b;
+    ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_g)), sizeof(*first_g));
+    ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_b)), sizeof(*first_b));
+    ++first_r;
+    ++first_g;
+    ++first_b;
   }
   ofs_rgb_spec.close();
-  
+
   for (size_t i = 0; i < bg.size(); ++i) {
     if (!almost_equal(bg[i], static_cast<fp_t>(0))) {
       s[i] = s[i] / bg[i];
@@ -476,14 +476,14 @@ int process_sample(const std::string &path) noexcept {
       bg[i] = 0;
     }
   }
-  
+
   println_i(std::fixed,
             std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
-  LOGD("%f", std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
+  //LOGD("%f", std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
   println_i(std::fixed,
             std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
-  LOGD("%f", std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
-  
+  //LOGD("%f", std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
+
   // Write result to file
   std::fstream ofs_res(path + RES, std::ios::out | std::ios::binary);
   if (!ofs_res.good()) {
