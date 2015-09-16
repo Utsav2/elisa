@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import uiuc.bioassay.elisa.ELISAApplication;
+import uiuc.bioassay.elisa.ELISASetupActivity;
 import uiuc.bioassay.elisa.R;
 import uiuc.bioassay.elisa.camera.CameraActivity;
 
@@ -36,6 +37,7 @@ import static uiuc.bioassay.elisa.ELISAApplication.readRGBSpec;
 public class BBProcActivity extends AppCompatActivity {
     private static final String TAG = "BB";
     private int currResult;
+    private String mode;
     private File folder;
     private Bitmap bitmap;
     private double[] rgb_spec;
@@ -50,7 +52,7 @@ public class BBProcActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bb_proc);
 
-        Log.d(TAG, getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA));
+        mode = getIntent().getStringExtra(ELISAApplication.MODE_EXTRA);
         folder = new File(getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA));
 
         Button done = (Button) findViewById(R.id.done);
@@ -63,11 +65,15 @@ public class BBProcActivity extends AppCompatActivity {
                             intent.setAction(ELISAApplication.ACTION_BROADBAND);
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath());
                             startActivity(intent);
-                        } else {
+                        } else if (mode.equals(ELISAApplication.MODE_ABSORPTION)){
                             Intent intent = new Intent(BBProcActivity.this, CameraActivity.class);
                             intent.setAction(ELISAApplication.ACTION_ONE_SAMPLE);
-                            Log.d(TAG, folder.getParent() + File.separator + ELISAApplication.SAMPLE_FOLDER);
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getParent() + File.separator + ELISAApplication.SAMPLE_FOLDER);
+                            startActivity(intent);
+                            finish();
+                        } else if (mode.equals(ELISAApplication.MODE_ELISA)) {
+                            Intent intent = new Intent(BBProcActivity.this, ELISASetupActivity.class);
+                            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getParent());
                             startActivity(intent);
                             finish();
                         }
@@ -161,7 +167,7 @@ public class BBProcActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_tlcproc, menu);
+        getMenuInflater().inflate(R.menu.menu_elisaproc, menu);
         return true;
     }
 
@@ -338,7 +344,7 @@ public class BBProcActivity extends AppCompatActivity {
         }
 
 
-        LineDataSet lineDataSet = new LineDataSet(yVals, "Broadband Normalized Spectrum");
+        LineDataSet lineDataSet = new LineDataSet(yVals, "Normalized Broadband Spectrum");
         lineDataSet.setDrawCircles(false);
         lineDataSet.setColor(Color.CYAN);
         lineDataSet.setLineWidth(1f);

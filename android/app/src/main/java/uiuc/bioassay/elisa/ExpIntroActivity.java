@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedWriter;
@@ -33,6 +34,9 @@ import static uiuc.bioassay.elisa.ELISAApplication.cleanFolder;
 public class ExpIntroActivity extends AppCompatActivity {
     private static final String TAG = "INTRO";
     private File folder;
+
+    private String mode;
+
     private EditText expName;
     private EditText expDay;
     /*
@@ -49,6 +53,15 @@ public class ExpIntroActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exp_intro);
+
+        TextView newExpWelcome = (TextView) findViewById(R.id.new_exp_welcome);
+        mode = getIntent().getStringExtra(ELISAApplication.MODE_EXTRA);
+        if (mode.equals(ELISAApplication.MODE_ABSORPTION)) {
+            newExpWelcome.setText("New Absorption Experiment");
+        } else if (mode.equals(ELISAApplication.MODE_ELISA)) {
+            newExpWelcome.setText("New ELISA Experiment");
+        }
+
         expName = (EditText) findViewById(R.id.exp_name);
 
         expName.setOnFocusChangeListener(
@@ -341,6 +354,7 @@ public class ExpIntroActivity extends AppCompatActivity {
                         exportInfoToFile();
                         Intent intent = new Intent(ExpIntroActivity.this, CameraActivity.class);
                         intent.setAction(ELISAApplication.ACTION_BROADBAND);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, mode);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getAbsolutePath() + File.separator + ELISAApplication.BB_FOLDER);
                         startActivity(intent);
                         finish();

@@ -1,5 +1,6 @@
 package uiuc.bioassay.elisa.proc;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,16 +29,19 @@ import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
 
 import static uiuc.bioassay.elisa.ELISAApplication.AVG_FILE_NAME;
+import static uiuc.bioassay.elisa.ELISAApplication.readBBResNormalized;
 import static uiuc.bioassay.elisa.ELISAApplication.readRGBSpec;
 import static uiuc.bioassay.elisa.ELISAApplication.readSampleResNormalized;
 
 public class SampleProcActivity extends AppCompatActivity {
     private static final String TAG = "SAMPLE";
     private int currResult;
-    private String folder;
+    private File folder;
     private Bitmap bitmap;
     private double[] rgb_spec;
     private double[] bb;
+    private double[] sample;
+    private double[] absData;
     private Button currButton = null;
 
     public void setCurrResult(int result) {
@@ -46,16 +50,62 @@ public class SampleProcActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bb_proc);
+        setContentView(R.layout.activity_sample_proc);
 
-        folder = getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA);
-        Log.d(TAG, folder);
+        folder = new File(getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA));
+        final Intent intent = getIntent();
 
         Button done = (Button) findViewById(R.id.done);
         done.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (intent.getAction().equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+                            if (sample == null) {
+                                sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
+                                // TODO: Enable the below in production
+                                // sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
+                            }
+                            if (bb == null) {
+                                bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
+                                // TODO: Enable the below in production
+                                // bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            }
+                            double resAbsData = 0;
+                            if (absData == null) {
+                                absData = new double[bb.length];
+                                for (int i = 0; i < bb.length; ++i) {
+                                    absData[i] = bb[i] - sample[i];
+                                }
+                            }
+                            int procMode = intent.getIntExtra(ELISAApplication.ELISA_PROC_MODE, 0);
+                            if (procMode == ELISAApplication.ELISA_PROC_MODE_FULL_INTEGRATION) {
+                                for (int i = 0; i < absData.length; ++i) {
+                                    resAbsData += absData[i];
+                                }
+                            } else {
+                                double nmScale = (ELISAApplication.RED_LASER_NM - ELISAApplication.GREEN_LASER_NM) /
+                                        (ELISAApplication.RED_LASER_PEAK - ELISAApplication.GREEN_LASER_PEAK);
+
+                                double nmOff = ELISAApplication.GREEN_LASER_NM - nmScale * ELISAApplication.GREEN_LASER_PEAK;
+
+                                double[] nm = new double[absData.length];
+                                for (int i = 0; i < absData.length; ++i) {
+                                    nm[i] = nmScale * i + nmOff;
+                                }
+                                int idx = 0;
+                                while (idx < absData.length && nm[idx] >= 450) {
+                                    ++idx;
+                                }
+                                assert(idx >= 1 && (idx < absData.length - 1));
+                                double a = (nm[idx - 1] - 450);
+                                double b = (450 - nm[idx]);
+                                Log.d(TAG, "" + a + ", " + b);
+                                resAbsData = (b/(a + b)) * absData[idx - 1] + (a / (a + b)) * absData[idx];
+                            }
+                            ELISAApplication.currentSampleIdx = intent.getIntExtra(ELISAApplication.INT_EXTRA, -1);
+                            ELISAApplication.resultSampleAbs = resAbsData;
+                        }
                         finish();
                     }
                 }
@@ -64,9 +114,9 @@ public class SampleProcActivity extends AppCompatActivity {
         final ImageView imageView = (ImageView) findViewById(R.id.imageView);
         final LineChart chart = (LineChart) findViewById(R.id.chart);
 
-        final Button image_button = (Button) findViewById(R.id.image_button);
-        currButton = image_button;
-        image_button.setOnClickListener(
+        final Button imageButton = (Button) findViewById(R.id.image_button);
+        currButton = imageButton;
+        imageButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -78,18 +128,18 @@ public class SampleProcActivity extends AppCompatActivity {
                         if (bitmap == null) {
                             bitmap = decodeIMG("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + AVG_FILE_NAME);
                             // TODO: Enable the below in production
-                            //bitmap = decodeIMG(folder + File.separator + AVG_FILE_NAME);
+                            // bitmap = decodeIMG(folder.getAbsolutePath() + File.separator + AVG_FILE_NAME);
                         }
                         imageView.setImageBitmap(bitmap);
                         imageView.setVisibility(View.VISIBLE);
-                        image_button.setEnabled(false);
-                        currButton = image_button;
+                        imageButton.setEnabled(false);
+                        currButton = imageButton;
                     }
                 }
         );
 
-        final Button rgb_button = (Button) findViewById(R.id.rgb_button);
-        rgb_button.setOnClickListener(
+        final Button rgbButton = (Button) findViewById(R.id.rgb_button);
+        rgbButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -101,18 +151,18 @@ public class SampleProcActivity extends AppCompatActivity {
                         if (rgb_spec == null) {
                             rgb_spec = readRGBSpec("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RGB_SPEC);
                             // TODO: Enable the below in production
-                            //rgb_spec = readRGBSpec(folder + File.separator + ELISAApplication.RGB_SPEC);
+                            // rgb_spec = readRGBSpec(folder.getAbsolutePath() + File.separator + ELISAApplication.RGB_SPEC);
                         }
                         setRGBSpecData(chart);
                         chart.setVisibility(View.VISIBLE);
-                        rgb_button.setEnabled(false);
-                        currButton = rgb_button;
+                        rgbButton.setEnabled(false);
+                        currButton = rgbButton;
                     }
                 }
         );
 
-        final Button normalized_button = (Button) findViewById(R.id.normalized_button);
-        normalized_button.setOnClickListener(
+        final Button normalizedButton = (Button) findViewById(R.id.normalized_button);
+        normalizedButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -121,15 +171,54 @@ public class SampleProcActivity extends AppCompatActivity {
                         }
                         currButton.setEnabled(true);
                         imageView.setVisibility(View.INVISIBLE);
-                        if (bb == null) {
-                            bb = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
+                        if (sample == null) {
+                            sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            // bb = readResNormalized(folder + File.separator + ELISAApplication.RES);
+                            // sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
                         }
-                        setBBData(chart);
+                        if (bb == null) {
+                            bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
+                            // TODO: Enable the below in production
+                            // bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                        }
+                        setSampleAndBBData(chart);
                         chart.setVisibility(View.VISIBLE);
-                        normalized_button.setEnabled(false);
-                        currButton = normalized_button;
+                        normalizedButton.setEnabled(false);
+                        currButton = normalizedButton;
+                    }
+                }
+        );
+
+        final Button absButton = (Button) findViewById(R.id.abs_button);
+        absButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (currResult == -1) {
+                            return;
+                        }
+                        currButton.setEnabled(true);
+                        imageView.setVisibility(View.INVISIBLE);
+                        if (sample == null) {
+                            sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
+                            // TODO: Enable the below in production
+                            // sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
+                        }
+                        if (bb == null) {
+                            bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
+                            // TODO: Enable the below in production
+                            // bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                        }
+                        if (absData == null) {
+                            absData = new double[bb.length];
+                            for (int i = 0; i < bb.length; ++i) {
+                                absData[i] = bb[i] - sample[i];
+                            }
+                        }
+                        setAbsData(chart);
+                        chart.setVisibility(View.VISIBLE);
+                        absButton.setEnabled(false);
+                        currButton = absButton;
                     }
                 }
         );
@@ -143,7 +232,7 @@ public class SampleProcActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_tlcproc, menu);
+        getMenuInflater().inflate(R.menu.menu_elisaproc, menu);
         return true;
     }
 
@@ -285,8 +374,100 @@ public class SampleProcActivity extends AppCompatActivity {
         lineChart.setDrawGridBackground(false);
     }
 
-    private void setBBData(LineChart lineChart) {
-        int length = bb.length;
+    private void setSampleAndBBData(LineChart lineChart) {
+        int length = sample.length;
+
+        double nmScale = (ELISAApplication.RED_LASER_NM - ELISAApplication.GREEN_LASER_NM) /
+                (ELISAApplication.RED_LASER_PEAK - ELISAApplication.GREEN_LASER_PEAK);
+
+        double nmOff = ELISAApplication.GREEN_LASER_NM - nmScale * ELISAApplication.GREEN_LASER_PEAK;
+
+        double[] nm = new double[length];
+        for (int i = 0; i < length; ++i) {
+            nm[i] = nmScale * i + nmOff;
+        }
+
+        int startIdx = 0;
+        while (nm[startIdx] > 700) {
+            ++startIdx;
+        }
+        int endIdx = startIdx;
+        while (endIdx < length && nm[endIdx] >= 380) {
+            ++endIdx;
+        }
+
+        ArrayList<String> xVals = new ArrayList<>();
+        for (int i = endIdx; i >= startIdx; --i) {
+            xVals.add((float) nm[i] + "");
+        }
+
+        ArrayList<Entry> ySampleVals = new ArrayList<>();
+        ArrayList<Entry> yBBVals = new ArrayList<>();
+
+        for (int i = endIdx; i >= startIdx; --i) {
+            int idx = endIdx - i;
+            ySampleVals.add(new Entry((float)sample[i], idx));
+            yBBVals.add(new Entry((float)bb[i], idx));
+        }
+
+
+        LineDataSet sampleSet = new LineDataSet(ySampleVals, "Normalized Sample Spectrum");
+        sampleSet.setDrawCircles(false);
+        sampleSet.setColor(Color.MAGENTA);
+        sampleSet.setLineWidth(1f);
+
+        LineDataSet bbSet = new LineDataSet(yBBVals, "Normalized Broadband Spectrum");
+        bbSet.setDrawCircles(false);
+        bbSet.setColor(Color.CYAN);
+        bbSet.setLineWidth(1f);
+
+        ArrayList<LineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(sampleSet); // add the datasets
+        dataSets.add(bbSet);
+
+
+        LineData data = new LineData(xVals, dataSets);
+        lineChart.setData(data);
+        lineChart.invalidate();
+        lineChart.setDescription("Wavelength [nm]");
+        lineChart.setDescriptionColor(Color.WHITE);
+
+        // XAxis
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextSize(10f);
+        xAxis.setTextColor(Color.WHITE);
+        xAxis.setDrawGridLines(false);
+
+
+        // YAxis
+        YAxis rightAxis = lineChart.getAxisRight();
+        rightAxis.setEnabled(false);
+
+        YAxis leftAxis = lineChart.getAxisLeft();
+        leftAxis.setTextSize(10f);
+        leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setDrawGridLines(false);
+
+        // Legend
+        Legend legend = lineChart.getLegend();
+        legend.setTextSize(10f);
+        legend.setTextColor(Color.WHITE);
+
+        lineChart.setTouchEnabled(false);
+        lineChart.setDragEnabled(false);
+        lineChart.setScaleEnabled(false);
+        lineChart.setScaleXEnabled(false);
+        lineChart.setScaleYEnabled(false);
+        lineChart.setPinchZoom(false);
+        lineChart.setDoubleTapToZoomEnabled(false);
+        lineChart.setHighlightEnabled(false);
+        lineChart.setHighlightPerDragEnabled(false);
+        lineChart.setDrawGridBackground(false);
+    }
+
+    private void setAbsData(LineChart lineChart) {
+        int length = sample.length;
 
         double nmScale = (ELISAApplication.RED_LASER_NM - ELISAApplication.GREEN_LASER_NM) /
                 (ELISAApplication.RED_LASER_PEAK - ELISAApplication.GREEN_LASER_PEAK);
@@ -316,17 +497,17 @@ public class SampleProcActivity extends AppCompatActivity {
 
         for (int i = endIdx; i >= startIdx; --i) {
             int idx = endIdx - i;
-            yVals.add(new Entry((float)bb[i], idx));
+            yVals.add(new Entry((float)absData[i], idx));
         }
 
 
-        LineDataSet lineDataSet = new LineDataSet(yVals, "Broadband Normalized Spectrum");
-        lineDataSet.setDrawCircles(false);
-        lineDataSet.setColor(Color.CYAN);
-        lineDataSet.setLineWidth(1f);
+        LineDataSet absSet = new LineDataSet(yVals, "Normalized Absorption Spectrum");
+        absSet.setDrawCircles(false);
+        absSet.setColor(Color.YELLOW);
+        absSet.setLineWidth(1f);
 
         ArrayList<LineDataSet> dataSets = new ArrayList<>();
-        dataSets.add(lineDataSet); // add the datasets
+        dataSets.add(absSet); // add the datasets
 
 
         LineData data = new LineData(xVals, dataSets);

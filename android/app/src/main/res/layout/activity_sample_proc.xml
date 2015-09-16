@@ -26,7 +26,7 @@
             android:gravity="center_vertical"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:text="Result Visualization Screen"
+            android:text="Sample Result Visualization Screen"
             android:textColor="@color/white" />
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,23 +35,28 @@
             android:gravity="center">
 
             <Button
-                android:layout_width="120dp"
+                android:layout_width="90dp"
                 android:layout_height="match_parent"
-                android:text="Image"
+                android:text="IMG"
                 android:layout_gravity="center"
                 android:id="@+id/image_button" />
 
             <Button
-                android:layout_width="120dp"
+                android:layout_width="90dp"
                 android:layout_height="match_parent"
-                android:text="RGB Spectrum"
+                android:text="RGB Spec"
                 android:id="@+id/rgb_button" />
 
             <Button
-                android:layout_width="120dp"
+                android:layout_width="90dp"
                 android:layout_height="match_parent"
-                android:text="Normalized Spectrum"
+                android:text="N Spec"
                 android:id="@+id/normalized_button" />
+            <Button
+                android:layout_width="90dp"
+                android:layout_height="match_parent"
+                android:text="ABS Spec"
+                android:id="@+id/abs_button" />
         </LinearLayout>
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chart"

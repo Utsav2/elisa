@@ -63,7 +63,7 @@ public class SampleProcWorker extends AsyncTask<String, Void, Integer> {
             return;
         }
         ImageView imageView = (ImageView) sampleProcActivity.findViewById(R.id.imageView);
-        imageView.setImageBitmap(decodeIMG(folder + File.separator + AVG_FILE_NAME));
+        imageView.setImageBitmap(decodeIMG(folder + File.separator + "1.jpg"));
 
         Button button = (Button) sampleProcActivity.findViewById(R.id.image_button);
         button.setEnabled(false);

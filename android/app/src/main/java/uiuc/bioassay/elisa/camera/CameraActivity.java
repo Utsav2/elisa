@@ -91,6 +91,9 @@ public class CameraActivity extends AppCompatActivity implements
     private Button buttonCapture;
     private String folder;
     private String action;
+    private int intExtra;
+    private int procMode;
+
     private TextView instructions;
     private TextView title;
 
@@ -100,8 +103,14 @@ public class CameraActivity extends AppCompatActivity implements
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
+            try {
+                mCamera.startPreview();
+            } catch (Exception e) {
+                Log.d(TAG, "Error starting preview: " + e.getMessage());
+                System.gc();
+                mCamera.startPreview();
+            }
             File pictureFile = getOutputImageFile(folder, picCount);
-            Log.d(TAG, pictureFile.getAbsolutePath());
             if (pictureFile == null){
                 Log.d(TAG, "Error creating media file, check storage permissions: ");
                 return;
@@ -116,7 +125,7 @@ public class CameraActivity extends AppCompatActivity implements
 
                 // Take more pictures if still
                 ++picCount;
-                //camera.startPreview();
+                // TODO: Should I call startPreview again ??? Sometimes it gives me exception
                 if (picCount < ELISAApplication.MAX_PICTURE) {
                     mCamera.takePicture(null, null,
                             mPicture);
@@ -128,12 +137,21 @@ public class CameraActivity extends AppCompatActivity implements
                     if (action.equals(ELISAApplication.ACTION_BROADBAND)) {
                         exportLocationToFile();
                         Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                         startActivity(intent);
                     } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE)){
                         exportLocationToFile();
                         Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
+                        startActivity(intent);
+                    } else if (action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+                        exportLocationToFile();
+                        Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
+                        intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
+                        intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
+                        intent.putExtra(ELISAApplication.INT_EXTRA, intExtra);
+                        intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
                         startActivity(intent);
                     }
                 }
@@ -142,13 +160,13 @@ public class CameraActivity extends AppCompatActivity implements
             } catch (IOException e) {
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
             } catch (Exception e) {
-                Log.d(TAG, "Error starting preview: " + e.getMessage());
-                Toast.makeText(CameraActivity.this, "Error starting preview: " + e.getMessage(), Toast.LENGTH_LONG);
-                picCount = 0;
-                buttonCapture.setEnabled(true);
+                System.gc();
+                mCamera.takePicture(null, null,
+                        mPicture);
             }
         }
     };
+
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -231,8 +249,9 @@ public class CameraActivity extends AppCompatActivity implements
 
     protected void onNewIntent (Intent intent) {
         folder = intent.getStringExtra(ELISAApplication.FOLDER_EXTRA);
-        Log.d(TAG, folder);
         action = intent.getAction();
+        intExtra = intent.getIntExtra(ELISAApplication.INT_EXTRA, -1);
+        procMode = intent.getIntExtra(ELISAApplication.ELISA_PROC_MODE, 0);
     }
 
     /**

@@ -15,4 +15,22 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_calib_info">CalibInfoActivity</string>
+
+    <string-array name="num_stds_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <string-array name="num_replicates_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string name="title_activity_elisaresult">ELISAResultActivity</string>
+    <string name="title_activity_elisagraph">ELISAGraphActivity</string>
 </resources>

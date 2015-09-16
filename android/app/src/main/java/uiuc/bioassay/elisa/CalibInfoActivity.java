@@ -28,12 +28,26 @@ public class CalibInfoActivity extends ActionBarActivity {
         TextView nmScaleText = (TextView) findViewById(R.id.nm_scale_text);
         nmScaleText.setText("nm per pixel: \t" + Math.abs(nmScale));
 
-        Button calibInfoNextButton = (Button) findViewById(R.id.calib_info_next_button);
-        calibInfoNextButton.setOnClickListener(
+        Button newAbsExpButton = (Button) findViewById(R.id.new_abs_exp);
+        newAbsExpButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(CalibInfoActivity.this, ExpIntroActivity.class);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, ELISAApplication.MODE_ABSORPTION);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+        );
+
+        Button newElisaExpButton = (Button) findViewById(R.id.new_elisa_exp);
+        newElisaExpButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(CalibInfoActivity.this, ExpIntroActivity.class);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, ELISAApplication.MODE_ELISA);
                         startActivity(intent);
                         finish();
                     }

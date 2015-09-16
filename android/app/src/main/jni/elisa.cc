@@ -479,10 +479,10 @@ int process_sample(const std::string &path) noexcept {
 
   println_i(std::fixed,
             std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
-  //LOGD("%f", std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
+  LOGD("%f", std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
   println_i(std::fixed,
             std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
-  //LOGD("%f", std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
+  LOGD("%f", std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
 
   // Write result to file
   std::fstream ofs_res(path + RES, std::ios::out | std::ios::binary);
@@ -491,7 +491,7 @@ int process_sample(const std::string &path) noexcept {
     return -1;
   }
   ofs_res.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
-  for (auto first = bg.begin(), last = bg.end(); first != last; ++first) {
+  for (auto first = s.begin(), last = s.end(); first != last; ++first) {
     ofs_res.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
   }
   ofs_res.close();

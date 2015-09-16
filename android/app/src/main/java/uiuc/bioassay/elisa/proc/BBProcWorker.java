@@ -67,7 +67,7 @@ public class BBProcWorker extends AsyncTask<String, Void, Integer> {
             return;
         }
         ImageView imageView = (ImageView) bbProcActivity.findViewById(R.id.imageView);
-        imageView.setImageBitmap(decodeIMG(folder + File.separator + AVG_FILE_NAME));
+        imageView.setImageBitmap(decodeIMG(folder + File.separator + "1.jpg"));
 
         Button button = (Button) bbProcActivity.findViewById(R.id.image_button);
         button.setEnabled(false);

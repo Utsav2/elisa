@@ -41,32 +41,35 @@
         </activity>
         <activity
             android:name=".ExpIntroActivity"
-            android:label="@string/title_activity_exp_intro" >
-        </activity>
+            android:label="@string/title_activity_exp_intro" />
         <activity
             android:name=".camera.CameraActivity"
             android:label="@string/title_activity_camera"
-            android:launchMode="singleInstance">
-        </activity>
-
+            android:launchMode="singleInstance" />
         <activity
             android:name=".proc.BBProcActivity"
-            android:label="@string/title_activity_bb_proc" >
-        </activity>
-
+            android:label="@string/title_activity_bb_proc" />
         <activity
             android:name=".proc.SampleProcActivity"
-            android:label="@string/title_activity_sample_proc" >
-        </activity>
+            android:label="@string/title_activity_sample_proc" />
 
         <service
             android:name=".services.NetworkService"
-            android:exported="false" >
-        </service>
+            android:exported="false" />
 
         <activity
             android:name=".CalibInfoActivity"
-            android:label="@string/title_activity_calib_info" >
+            android:label="@string/title_activity_calib_info" />
+        <activity
+            android:name=".ELISASetupActivity"
+            android:label="ELISASetupActivity" >
+        </activity>
+        <activity
+            android:name=".ELISAResultActivity"
+            android:label="@string/title_activity_elisaresult" />
+        <activity
+            android:name=".ELISAGraphActivity"
+            android:label="@string/title_activity_elisagraph" >
         </activity>
     </application>
 
