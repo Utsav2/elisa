@@ -62,14 +62,14 @@ public class SampleProcActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         if (intent.getAction().equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
                             if (sample == null) {
-                                sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
+                                // sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
                                 // TODO: Enable the below in production
-                                // sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
+                                sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
                             }
                             if (bb == null) {
-                                bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
+                                // bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
                                 // TODO: Enable the below in production
-                                // bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                                bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
                             }
                             double resAbsData = 0;
                             if (absData == null) {
@@ -126,9 +126,9 @@ public class SampleProcActivity extends AppCompatActivity {
                         currButton.setEnabled(true);
                         chart.setVisibility(View.INVISIBLE);
                         if (bitmap == null) {
-                            bitmap = decodeIMG("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + AVG_FILE_NAME);
+                            // bitmap = decodeIMG("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + AVG_FILE_NAME);
                             // TODO: Enable the below in production
-                            // bitmap = decodeIMG(folder.getAbsolutePath() + File.separator + AVG_FILE_NAME);
+                            bitmap = decodeIMG(folder.getAbsolutePath() + File.separator + "1.jpg");
                         }
                         imageView.setImageBitmap(bitmap);
                         imageView.setVisibility(View.VISIBLE);
@@ -149,9 +149,9 @@ public class SampleProcActivity extends AppCompatActivity {
                         currButton.setEnabled(true);
                         imageView.setVisibility(View.INVISIBLE);
                         if (rgb_spec == null) {
-                            rgb_spec = readRGBSpec("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RGB_SPEC);
+                            // rgb_spec = readRGBSpec("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RGB_SPEC);
                             // TODO: Enable the below in production
-                            // rgb_spec = readRGBSpec(folder.getAbsolutePath() + File.separator + ELISAApplication.RGB_SPEC);
+                            rgb_spec = readRGBSpec(folder.getAbsolutePath() + File.separator + ELISAApplication.RGB_SPEC);
                         }
                         setRGBSpecData(chart);
                         chart.setVisibility(View.VISIBLE);
@@ -172,14 +172,14 @@ public class SampleProcActivity extends AppCompatActivity {
                         currButton.setEnabled(true);
                         imageView.setVisibility(View.INVISIBLE);
                         if (sample == null) {
-                            sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
+                            // sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            // sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
+                            sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
                         }
                         if (bb == null) {
-                            bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
+                            // bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            // bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
                         }
                         setSampleAndBBData(chart);
                         chart.setVisibility(View.VISIBLE);
@@ -200,14 +200,14 @@ public class SampleProcActivity extends AppCompatActivity {
                         currButton.setEnabled(true);
                         imageView.setVisibility(View.INVISIBLE);
                         if (sample == null) {
-                            sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
+                            // sample = readSampleResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            // sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
+                            sample = readSampleResNormalized(folder.getAbsolutePath() + File.separator + ELISAApplication.RES);
                         }
                         if (bb == null) {
-                            bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
+                            // bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            // bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
                         }
                         if (absData == null) {
                             absData = new double[bb.length];
@@ -225,8 +225,9 @@ public class SampleProcActivity extends AppCompatActivity {
 
         SampleProcWorker sampleProcWorker = new SampleProcWorker(this);
 
-        sampleProcWorker.execute("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample");
-        //sampleProcWorker.execute(folder);
+        // sampleProcWorker.execute("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample");
+        // TODO: Enable the below in production
+        sampleProcWorker.execute(folder.getAbsolutePath());
     }
 
     @Override
@@ -282,7 +283,7 @@ public class SampleProcActivity extends AppCompatActivity {
             ++startIdx;
         }
         int endIdx = startIdx;
-        while (endIdx < length && nm[endIdx] >= 380) {
+        while (endIdx < (length - 1) && nm[endIdx] >= 380) {
             ++endIdx;
         }
 
@@ -392,7 +393,7 @@ public class SampleProcActivity extends AppCompatActivity {
             ++startIdx;
         }
         int endIdx = startIdx;
-        while (endIdx < length && nm[endIdx] >= 380) {
+        while (endIdx < (length - 1) && nm[endIdx] >= 380) {
             ++endIdx;
         }
 
@@ -484,7 +485,7 @@ public class SampleProcActivity extends AppCompatActivity {
             ++startIdx;
         }
         int endIdx = startIdx;
-        while (endIdx < length && nm[endIdx] >= 380) {
+        while (endIdx < (length - 1) && nm[endIdx] >= 380) {
             ++endIdx;
         }
 

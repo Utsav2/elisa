@@ -97,9 +97,9 @@ public class BBProcActivity extends AppCompatActivity {
                         currButton.setEnabled(true);
                         chart.setVisibility(View.INVISIBLE);
                         if (bitmap == null) {
-                            bitmap = decodeIMG("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + AVG_FILE_NAME);
+                            // bitmap = decodeIMG("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + AVG_FILE_NAME);
                             // TODO: Enable the below in production
-                            // bitmap = decodeIMG(folder + File.separator + AVG_FILE_NAME);
+                            bitmap = decodeIMG(folder + File.separator + "1.jpg");
                         }
                         imageView.setImageBitmap(bitmap);
                         imageView.setVisibility(View.VISIBLE);
@@ -120,9 +120,9 @@ public class BBProcActivity extends AppCompatActivity {
                         currButton.setEnabled(true);
                         imageView.setVisibility(View.INVISIBLE);
                         if (rgb_spec == null) {
-                            rgb_spec = readRGBSpec("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RGB_SPEC);
+                            // rgb_spec = readRGBSpec("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RGB_SPEC);
                             // TODO: Enable the below in production
-                            // rgb_spec = readRGBSpec(folder + File.separator + ELISAApplication.BB_RGB_SPEC);
+                            rgb_spec = readRGBSpec(folder + File.separator + ELISAApplication.RGB_SPEC);
                         }
                         setRGBSpecData(chart);
                         chart.setVisibility(View.VISIBLE);
@@ -143,9 +143,9 @@ public class BBProcActivity extends AppCompatActivity {
                         currButton.setEnabled(true);
                         imageView.setVisibility(View.INVISIBLE);
                         if (bb == null) {
-                            bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
+                            // bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            // bb = readBBNormalized(folder + File.separator + ELISAApplication.BB_RES);
+                            bb = readBBResNormalized(folder + File.separator + ELISAApplication.RES);
                         }
                         setBBData(chart);
                         chart.setVisibility(View.VISIBLE);
@@ -159,9 +159,9 @@ public class BBProcActivity extends AppCompatActivity {
 
 
 
-        bbProcWorker.execute("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb");
+        // bbProcWorker.execute("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb");
         // TODO: Enable the below in production
-        // bbProcWorker.execute(folder.getAbsolutePath());
+        bbProcWorker.execute(folder.getAbsolutePath());
     }
 
     @Override
@@ -217,7 +217,7 @@ public class BBProcActivity extends AppCompatActivity {
             ++startIdx;
         }
         int endIdx = startIdx;
-        while (endIdx < length && nm[endIdx] >= 380) {
+        while (endIdx < (length - 1) && nm[endIdx] >= 380) {
             ++endIdx;
         }
 
@@ -327,7 +327,7 @@ public class BBProcActivity extends AppCompatActivity {
             ++startIdx;
         }
         int endIdx = startIdx;
-        while (endIdx < length && nm[endIdx] >= 380) {
+        while (endIdx < (length - 1) && nm[endIdx] >= 380) {
             ++endIdx;
         }
 

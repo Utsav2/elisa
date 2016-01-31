@@ -579,6 +579,18 @@ public class CameraActivity extends AppCompatActivity implements
             params.setPictureSize(width, height);
         }
 
+        // TODO: may want to enable this to view paramerater that aren't exposed by the API
+        // Log.d(TAG, params.flatten());
+
+        // Set metering mode
+        params.set("metering", "spot");
+
+        // Set flash
+        params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+
+        // Set anti banding
+        params.setAntibanding(Camera.Parameters.ANTIBANDING_OFF);
+
         // Set image quality
         params.setJpegQuality(100);
 
@@ -592,11 +604,11 @@ public class CameraActivity extends AppCompatActivity implements
         params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
 
         // Set iso
-        params.set("iso", String.valueOf("200"));
+        params.set("iso", String.valueOf("100"));
 
         // lock auto exposure
         if (params.isAutoExposureLockSupported()) {
-            params.setAutoExposureLock(true);
+           params.setAutoExposureLock(true);
         }
 
         // lock auto white balance
