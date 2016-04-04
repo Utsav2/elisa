@@ -342,19 +342,24 @@ int process_bb(const std::string &path) noexcept {
   return 0;
 }
 
-int process_sample(const std::string &path) noexcept {
+int process_sample(const std::string &path, int action) noexcept {
   size_t pos = path.length() - 1;
-  if (path[pos] == '/') {
-    --pos;
-  }
-  while (path[pos] != '/') {
-    --pos;
+  while (action > 0) {
+    if (path[pos] == '/') {
+      --pos;
+    }
+    while (path[pos] != '/') {
+      --pos;
+    }
+    --action;
   }
   auto root = path.substr(0, pos + 1);
   // Read broadband data file
   std::fstream ifs(root + BB_FOLDER + BB_DATA, std::ios::in | std::ios::binary);
   if (!ifs.good()) {
     println_e("Couldn't open broadband file to read");
+    std::string s = root + BB_FOLDER + BB_DATA + " Couldn't open broadband file to read";
+    LOGD("%s\n", s.c_str());
     return -1;
   }
   size_t top_off;
@@ -388,6 +393,7 @@ int process_sample(const std::string &path) noexcept {
   std::fstream ifs_res(root + BB_FOLDER + RES, std::ios::in | std::ios::binary);
   if (!ifs_res.good()) {
     println_e("Couldn't open broadband result file to read");
+    LOGD("Couldn't open broadband result file to read");
     return -1;
   }
   ifs_res.read(reinterpret_cast<char *>(&col_end), sizeof(col_end));

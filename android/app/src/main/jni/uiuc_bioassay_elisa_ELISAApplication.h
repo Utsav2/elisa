@@ -35,7 +35,7 @@ JNIEXPORT jint JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processBB
  * Signature: (Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processSample
-  (JNIEnv *, jclass, jstring);
+  (JNIEnv *, jclass, jstring, jint);
 
 /*
  * Class:     uiuc_bioassay_elisa_ELISAApplication

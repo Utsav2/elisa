@@ -143,6 +143,7 @@ public class CameraActivity extends AppCompatActivity implements
                     } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE)){
                         exportLocationToFile();
                         Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
+                        intent.setAction(ELISAApplication.ACTION_ONE_SAMPLE);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                         startActivity(intent);
                     } else if (action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
@@ -150,10 +151,12 @@ public class CameraActivity extends AppCompatActivity implements
                         Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
                         intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
+                        Log.d(TAG, "intExtra: " + intExtra);
                         intent.putExtra(ELISAApplication.INT_EXTRA, intExtra);
                         intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
                         startActivity(intent);
                     }
+                    finish();
                 }
             } catch (FileNotFoundException e) {
                 Log.d(TAG, "File not found: " + e.getMessage());
@@ -213,6 +216,8 @@ public class CameraActivity extends AppCompatActivity implements
 
         folder = getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA);
         action = getIntent().getAction();
+        intExtra = getIntent().getIntExtra(ELISAApplication.INT_EXTRA, -1);
+        procMode = getIntent().getIntExtra(ELISAApplication.ELISA_PROC_MODE, 0);
         Log.d(TAG, folder);
         Log.d(TAG, action);
         // Open camera
@@ -247,12 +252,13 @@ public class CameraActivity extends AppCompatActivity implements
         buildGoogleApiClient();
     }
 
+    /*
     protected void onNewIntent (Intent intent) {
         folder = intent.getStringExtra(ELISAApplication.FOLDER_EXTRA);
         action = intent.getAction();
         intExtra = intent.getIntExtra(ELISAApplication.INT_EXTRA, -1);
         procMode = intent.getIntExtra(ELISAApplication.ELISA_PROC_MODE, 0);
-    }
+    }*/
 
     /**
      * Updates fields based on data stored in the bundle.
@@ -583,10 +589,7 @@ public class CameraActivity extends AppCompatActivity implements
         // Log.d(TAG, params.flatten());
 
         // Set metering mode
-        params.set("metering", "spot");
-
-        // Set flash
-        params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        params.set("metering", "matrix");
 
         // Set anti banding
         params.setAntibanding(Camera.Parameters.ANTIBANDING_OFF);
@@ -603,8 +606,17 @@ public class CameraActivity extends AppCompatActivity implements
         // Set white balance
         params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
 
-        // Set iso
-        params.set("iso", String.valueOf("100"));
+        if (getIntent().getStringExtra(ELISAApplication.MODE_EXTRA).equals(ELISAApplication.MODE_FLUORESCENT)) {
+            // Set flash
+            params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            // Set iso
+            params.set("iso", String.valueOf("800"));
+        } else {
+            // Set flash
+            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            // Set iso
+            params.set("iso", String.valueOf("100"));
+        }
 
         // lock auto exposure
         if (params.isAutoExposureLockSupported()) {

@@ -68,16 +68,22 @@ public class BBProcActivity extends AppCompatActivity {
                         } else if (mode.equals(ELISAApplication.MODE_ABSORPTION)){
                             Intent intent = new Intent(BBProcActivity.this, CameraActivity.class);
                             intent.setAction(ELISAApplication.ACTION_ONE_SAMPLE);
+                            intent.putExtra(ELISAApplication.MODE_EXTRA, mode);
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getParent() + File.separator + ELISAApplication.SAMPLE_FOLDER);
                             startActivity(intent);
-                            finish();
+                        } else if (mode.equals(ELISAApplication.MODE_FLUORESCENT)) {
+                            Intent intent = new Intent(BBProcActivity.this, CameraActivity.class);
+                            intent.setAction(ELISAApplication.ACTION_ONE_SAMPLE);
+                            intent.putExtra(ELISAApplication.MODE_EXTRA, mode);
+                            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getParent() + File.separator + ELISAApplication.SAMPLE_FOLDER);
+                            startActivity(intent);
                         } else if (mode.equals(ELISAApplication.MODE_ELISA)) {
                             Intent intent = new Intent(BBProcActivity.this, ELISASetupActivity.class);
+                            intent.putExtra(ELISAApplication.MODE_EXTRA, mode);
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getParent());
                             startActivity(intent);
-                            finish();
                         }
-
+                        finish();
                     }
                 }
         );

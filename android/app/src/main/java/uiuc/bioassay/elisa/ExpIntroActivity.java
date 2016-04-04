@@ -58,6 +58,8 @@ public class ExpIntroActivity extends AppCompatActivity {
         mode = getIntent().getStringExtra(ELISAApplication.MODE_EXTRA);
         if (mode.equals(ELISAApplication.MODE_ABSORPTION)) {
             newExpWelcome.setText("New Absorption Experiment");
+        } else if (mode.equals(ELISAApplication.MODE_FLUORESCENT)) {
+            newExpWelcome.setText("New Fluorescent Experiment");
         } else if (mode.equals(ELISAApplication.MODE_ELISA)) {
             newExpWelcome.setText("New ELISA Experiment");
         }

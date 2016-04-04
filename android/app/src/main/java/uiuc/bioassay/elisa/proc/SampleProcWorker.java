@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import java.io.File;
 
+import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
 
 import static uiuc.bioassay.elisa.ELISAApplication.AVG_FILE_NAME;
@@ -45,7 +46,11 @@ public class SampleProcWorker extends AsyncTask<String, Void, Integer> {
     @Override
     protected Integer doInBackground(String... params) {
         folder = params[0];
-        return processSample(folder + File.separator);
+        if (params[1].equals(ELISAApplication.ACTION_ONE_SAMPLE)) {
+            return processSample(folder + File.separator, 1);
+        } else {
+            return processSample(folder + File.separator, 2);
+        }
     }
 
     @Override

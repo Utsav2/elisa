@@ -69,7 +69,11 @@ public class SampleProcActivity extends AppCompatActivity {
                             if (bb == null) {
                                 // bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
                                 // TODO: Enable the below in production
-                                bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                                if (intent.getAction().equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+                                    bb = readBBResNormalized(folder.getParentFile().getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                                } else if (intent.getAction().equals(ELISAApplication.ACTION_ONE_SAMPLE)) {
+                                    bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                                }
                             }
                             double resAbsData = 0;
                             if (absData == null) {
@@ -103,6 +107,7 @@ public class SampleProcActivity extends AppCompatActivity {
                                 Log.d(TAG, "" + a + ", " + b);
                                 resAbsData = (b/(a + b)) * absData[idx - 1] + (a / (a + b)) * absData[idx];
                             }
+                            Log.d(TAG, "xxxxxxzzzzz: " + intent.getIntExtra(ELISAApplication.INT_EXTRA, -1));
                             ELISAApplication.currentSampleIdx = intent.getIntExtra(ELISAApplication.INT_EXTRA, -1);
                             ELISAApplication.resultSampleAbs = resAbsData;
                         }
@@ -179,7 +184,12 @@ public class SampleProcActivity extends AppCompatActivity {
                         if (bb == null) {
                             // bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                             /* Get grandparent */
+                            if (intent.getAction().equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+                                bb = readBBResNormalized(folder.getParentFile().getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            } else if (intent.getAction().equals(ELISAApplication.ACTION_ONE_SAMPLE)) {
+                                bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            }
                         }
                         setSampleAndBBData(chart);
                         chart.setVisibility(View.VISIBLE);
@@ -207,7 +217,12 @@ public class SampleProcActivity extends AppCompatActivity {
                         if (bb == null) {
                             // bb = readBBResNormalized("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb" + File.separator + ELISAApplication.RES);
                             // TODO: Enable the below in production
-                            bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            if (intent.getAction().equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+                                /* Get grandparent */
+                                bb = readBBResNormalized(folder.getParentFile().getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            } else if (intent.getAction().equals(ELISAApplication.ACTION_ONE_SAMPLE)) {
+                                bb = readBBResNormalized(folder.getParent() + File.separator + ELISAApplication.BB_FOLDER + File.separator + ELISAApplication.RES);
+                            }
                         }
                         if (absData == null) {
                             absData = new double[bb.length];
@@ -227,7 +242,11 @@ public class SampleProcActivity extends AppCompatActivity {
 
         // sampleProcWorker.execute("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample");
         // TODO: Enable the below in production
-        sampleProcWorker.execute(folder.getAbsolutePath());
+        if (intent.getAction().equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+            sampleProcWorker.execute(folder.getAbsolutePath(), ELISAApplication.ACTION_MULTIPLE_SAMPLE);
+        } else if (intent.getAction().equals(ELISAApplication.ACTION_ONE_SAMPLE)){
+            sampleProcWorker.execute(folder.getAbsolutePath(), ELISAApplication.ACTION_ONE_SAMPLE);
+        }
     }
 
     @Override

@@ -44,8 +44,8 @@
             android:label="@string/title_activity_exp_intro" />
         <activity
             android:name=".camera.CameraActivity"
-            android:label="@string/title_activity_camera"
-            android:launchMode="singleInstance" />
+            android:label="@string/title_activity_camera" />
+            <!--android:launchMode="singleInstance" -->
         <activity
             android:name=".proc.BBProcActivity"
             android:label="@string/title_activity_bb_proc" />

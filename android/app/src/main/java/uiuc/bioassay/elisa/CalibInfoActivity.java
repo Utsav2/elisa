@@ -41,6 +41,19 @@ public class CalibInfoActivity extends ActionBarActivity {
                 }
         );
 
+        Button newFluorescentExpButton = (Button) findViewById(R.id.new_flourescent_exp);
+        newFluorescentExpButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(CalibInfoActivity.this, ExpIntroActivity.class);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, ELISAApplication.MODE_FLUORESCENT);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+        );
+
         Button newElisaExpButton = (Button) findViewById(R.id.new_elisa_exp);
         newElisaExpButton.setOnClickListener(
                 new View.OnClickListener() {

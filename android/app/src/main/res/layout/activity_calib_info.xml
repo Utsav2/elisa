@@ -63,21 +63,28 @@
             <Button
                 android:id="@+id/calib_info_new"
                 android:text="New Calibration"
-                android:layout_width="150dp"
+                android:layout_width="160dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center_horizontal" />
 
             <Button
                 android:id="@+id/new_abs_exp"
                 android:text="New Absorption Experiment"
-                android:layout_width="150dp"
+                android:layout_width="160dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center_horizontal" />
+
+            <Button
+                android:id="@+id/new_flourescent_exp"
+                android:text="New Fluorescent Experiment"
+                android:layout_width="160dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center_horizontal" />
 
             <Button
                 android:id="@+id/new_elisa_exp"
                 android:text="New ELISA Experiment"
-                android:layout_width="150dp"
+                android:layout_width="160dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center_horizontal" />
         </LinearLayout>

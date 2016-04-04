@@ -212,8 +212,10 @@ public class ELISAResultActivity extends AppCompatActivity {
                                             case DialogInterface.BUTTON_POSITIVE:
                                                 dataRetrieving = true;
                                                 Intent intent = new Intent(ELISAResultActivity.this, CameraActivity.class);
+                                                intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
                                                 intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
                                                 intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder + File.separator + editText.getText().toString() + File.separator + (finalJ + 1));
+                                                Log.d(TAG, "int Extra: " + (finalI * nCols + finalJ));
                                                 intent.putExtra(ELISAApplication.INT_EXTRA, finalI * nCols + finalJ);
                                                 intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
                                                 startActivity(intent);
@@ -257,14 +259,21 @@ public class ELISAResultActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (dataRetrieving) {
+            Log.d(TAG, "zzzzz: " + ELISAApplication.currentSampleIdx);
             int i = ELISAApplication.currentSampleIdx / maxNumReplicates;
             int j = ELISAApplication.currentSampleIdx % maxNumReplicates;
             TableRow tableRow = (TableRow) tableLayout.getChildAt(i + 1);
             Button button = (Button) tableRow.getChildAt(j + 1);
             TextView textView = (TextView) tableRow.getChildAt(maxNumReplicates + 1);
-            absorptions[i] += ELISAApplication.resultSampleAbs;
-            numReplitcates[i] += 1;
+            String oldButtonText = button.getText().toString();
             Log.d(TAG, ELISAApplication.resultSampleAbs + "");
+            if (oldButtonText.equals("")) {
+                absorptions[i] += ELISAApplication.resultSampleAbs;
+                numReplitcates[i] += 1;
+            } else {
+                double oldResult = Double.parseDouble(oldButtonText);
+                absorptions[i] = absorptions[i] - oldResult + ELISAApplication.resultSampleAbs;
+            }
             button.setText("" + round(ELISAApplication.resultSampleAbs, 2));
             textView.setText("" + round(absorptions[i] / numReplitcates[i], 2));
             dataRetrieving = false;

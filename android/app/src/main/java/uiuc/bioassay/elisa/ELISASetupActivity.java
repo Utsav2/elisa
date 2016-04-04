@@ -26,6 +26,7 @@ public class ELISASetupActivity extends ActionBarActivity {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(ELISASetupActivity.this, ELISAResultActivity.class);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, getIntent().getStringExtra(ELISAApplication.FOLDER_EXTRA));
                         intent.putExtra(ELISAApplication.NUM_STDS, Integer.parseInt(numStdsSpinner.getSelectedItem().toString()));
                         intent.putExtra(ELISAApplication.MAX_NUM_REPLICATES, Integer.parseInt(numReplicatesSpinner.getSelectedItem().toString()));

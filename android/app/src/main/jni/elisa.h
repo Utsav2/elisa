@@ -21,9 +21,9 @@ inline int process_bb(const char *path) noexcept {
   return process_bb(std::string(path));
 }
 
-int process_sample(const std::string &path) noexcept;
-inline int process_sample(const char *path) noexcept {
-  return process_sample(std::string(path));
+int process_sample(const std::string &path, int action) noexcept;
+inline int process_sample(const char *path, int action) noexcept {
+  return process_sample(std::string(path), action);
 }
 
 inline std::vector<fp_t> read_rgb_spec(const char* path) {

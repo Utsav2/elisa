@@ -53,9 +53,9 @@ Java_uiuc_bioassay_elisa_ELISAApplication_readBBResNormalized
 
 JNIEXPORT jint JNICALL 
 Java_uiuc_bioassay_elisa_ELISAApplication_processSample(JNIEnv *env, jclass,
-                                                             jstring jstr) {
+                                                             jstring jstr, jint action) {
   const char *path = env->GetStringUTFChars(jstr, nullptr);
-  int ret = elisa::process_sample(path);
+  int ret = elisa::process_sample(path, action);
   env->ReleaseStringUTFChars(jstr, path);
   return ret;
 }
