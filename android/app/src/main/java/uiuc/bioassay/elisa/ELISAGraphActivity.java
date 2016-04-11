@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -29,6 +31,15 @@ public class ELISAGraphActivity extends AppCompatActivity {
         double[] stds = intent.getDoubleArrayExtra(ELISAApplication.ELISA_STDS);
         LineChart chart = (LineChart) findViewById(R.id.elisa_result_chart);
         setData(stds, finalResult, chart);
+        Button doneGraph = (Button) findViewById(R.id.doneGraph);
+        doneGraph.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        finish();
+                    }
+                }
+        );
     }
 
     private void setData(double[] x, double[] y, LineChart lineChart) {
