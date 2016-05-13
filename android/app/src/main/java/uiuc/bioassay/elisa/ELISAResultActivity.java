@@ -68,29 +68,46 @@ public class ELISAResultActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        double[] finalResult = new double[absorptions.length];
-                        for (int i = 0; i < finalResult.length; ++i) {
-                            Log.d(TAG, "" + numReplitcates[i]);
-                            if (numReplitcates[i] == 0) {
-                                finalResult[i] = 0;
-                            } else {
-                                finalResult[i] = absorptions[i] / numReplitcates[i];
+                        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case DialogInterface.BUTTON_POSITIVE:
+                                        double[] finalResult = new double[absorptions.length];
+                                        for (int i = 0; i < finalResult.length; ++i) {
+                                            Log.d(TAG, "" + numReplitcates[i]);
+                                            if (numReplitcates[i] == 0) {
+                                                finalResult[i] = 0;
+                                            } else {
+                                                finalResult[i] = absorptions[i] / numReplitcates[i];
+                                            }
+                                        }
+                                        double[] stds = new double[absorptions.length];
+                                        for (int i = 0; i < stds.length; ++i) {
+                                            if (editTexts[i].getText().toString().equals("")) {
+                                                Toast.makeText(ELISAResultActivity.this, "Please fill in the std concentration", Toast.LENGTH_LONG).show();
+                                                editTexts[i].requestFocus();
+                                                return;
+                                            }
+                                            stds[i] = Double.parseDouble(editTexts[i].getText().toString());
+                                        }
+                                        Intent intentGraph = new Intent(ELISAResultActivity.this, ELISAGraphActivity.class);
+                                        intentGraph.putExtra(ELISAApplication.ELISA_ABS_RESULT, finalResult);
+                                        intentGraph.putExtra(ELISAApplication.ELISA_STDS, stds);
+                                        startActivity(intentGraph);
+                                        finish();
+                                        break;
+
+                                    case DialogInterface.BUTTON_NEGATIVE:
+                                        //No button clicked
+                                        break;
+                                }
                             }
-                        }
-                        double[] stds = new double[absorptions.length];
-                        for (int i = 0; i < stds.length; ++i) {
-                            if (editTexts[i].getText().toString().equals("")) {
-                                Toast.makeText(ELISAResultActivity.this, "Please fill in the std concentration", Toast.LENGTH_LONG).show();
-                                editTexts[i].requestFocus();
-                                return;
-                            }
-                            stds[i] = Double.parseDouble(editTexts[i].getText().toString());
-                        }
-                        Intent intentGraph = new Intent(ELISAResultActivity.this, ELISAGraphActivity.class);
-                        intentGraph.putExtra(ELISAApplication.ELISA_ABS_RESULT, finalResult);
-                        intentGraph.putExtra(ELISAApplication.ELISA_STDS, stds);
-                        startActivity(intentGraph);
-                        finish();
+                        };
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ELISAResultActivity.this);
+                        builder.setTitle("Are you sure to go next?")
+                                .setPositiveButton("Yes", dialogClickListener)
+                                .setNegativeButton("No", dialogClickListener).show();
                     }
                 }
         );
