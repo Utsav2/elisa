@@ -231,10 +231,10 @@ public class CameraActivity extends AppCompatActivity implements
         Log.d(TAG, action);
 
         final boolean isFluorescent = modeExtra.equals(ELISAApplication.MODE_FLUORESCENT);
-        // surfaceView = (SurfaceView)findViewById(R.id.surface_camera);
-        // surfaceView.setEnabled(false);
-        // surfaceView.getHolder().addCallback(this);
-        // surfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        surfaceView = (SurfaceView)findViewById(R.id.surface_camera);
+        surfaceView.setEnabled(false);
+        surfaceView.getHolder().addCallback(this);
+        surfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         // Open camera
         openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
@@ -281,6 +281,8 @@ public class CameraActivity extends AppCompatActivity implements
 
     protected void startRecording() {
         releaseCamera();
+        mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+        mCamera.unlock();
 
         mRecorder = new MediaRecorder();  // Works well
 
@@ -291,7 +293,13 @@ public class CameraActivity extends AppCompatActivity implements
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 
         mRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-        mRecorder.setOutputFile("/sdcard/zzzz.3gp");
+        File videoFile = getOutputVideoFile(folder);
+        if (videoFile == null) {
+            Log.d(TAG, "Error creating media file, check storage permissions: ");
+            return;
+        }
+        mRecorder.setOutputFile(videoFile.getAbsolutePath());
+        Log.d(TAG, "Saving video at: " + videoFile.getAbsolutePath());
 
         try {
             mRecorder.prepare();
@@ -304,7 +312,7 @@ public class CameraActivity extends AppCompatActivity implements
     protected void stopRecording() {
         mRecorder.stop();
         mRecorder.release();
-        mCamera.release();
+        releaseCamera();
     }
 
     private void releaseMediaRecorder(){
@@ -552,9 +560,13 @@ public class CameraActivity extends AppCompatActivity implements
         if (mCamera != null){
             mCamera.stopPreview();
             //mCamera.setPreviewCallback(null);
-            mPreview.getHolder().removeCallback(mPreview);
+            if (mPreview != null) {
+                mPreview.getHolder().removeCallback(mPreview);
+            }
+            if (preview != null) {
+                preview.removeView(mPreview);
+            }
             mCamera.release();        // release the elisa for other applications
-            preview.removeView(mPreview);
             mPreview = null;
             mCamera = null;
         }
@@ -669,15 +681,16 @@ public class CameraActivity extends AppCompatActivity implements
         // Set exposure offset
         params.setExposureCompensation(0);
 
-        // Set white balance
-        params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
 
         if (modeExtra.equals(ELISAApplication.MODE_FLUORESCENT)) {
+            params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT);
             // Set flash
             params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             // Set iso
             params.set("iso", String.valueOf("800"));
         } else {
+            // Set white balance
+            params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
             // Set flash
             params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             // Set iso
@@ -748,11 +761,7 @@ public class CameraActivity extends AppCompatActivity implements
         }
     }
 
-    /** Create a File for saving an image */
-    private static File getOutputImageFile(String folder, int count){
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
+    private static File createDirectory(String folder) {
         File mediaStorageDir = new File(folder);
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
@@ -764,7 +773,25 @@ public class CameraActivity extends AppCompatActivity implements
                 return null;
             }
         }
+        return mediaStorageDir;
+    }
 
+    private static File getOutputVideoFile(String folder) {
+        File mediaStorageDir = createDirectory(folder);
+        if (mediaStorageDir == null) {
+            return null;
+        }
+        return new File(mediaStorageDir.getPath() + File.separator + "video.mp4");
+    }
+
+    /** Create a File for saving an image */
+    private static File getOutputImageFile(String folder, int count){
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+        File mediaStorageDir = createDirectory(folder);
+        if (mediaStorageDir == null) {
+            return null;
+        }
         // Create a media file name
         //String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         return new File(mediaStorageDir.getPath() + File.separator +
