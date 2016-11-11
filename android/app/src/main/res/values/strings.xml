@@ -39,6 +39,4 @@
     </string-array>
     <string name="title_activity_elisaresult">ELISAResultActivity</string>
     <string name="title_activity_elisagraph">ELISAGraphActivity</string>
-    <string name="capture">Capture</string>
-    <string name="stop_capturing">Stop Capturing</string>
 </resources>
