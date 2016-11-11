@@ -20,7 +20,8 @@ android {
     sourceSets.main.jni.srcDirs = []
 
     task ndkBuild(type: Exec, description: 'Compile JNI source via NDK') {
-        commandLine "ndk-build.cmd",
+        def ndkDir = android.ndkDirectory.getAbsolutePath()
+        commandLine ndkDir + "/ndk-build.cmd",
                 'NDK_PROJECT_PATH=build/intermediates/ndk',
                 'NDK_LIBS_OUT=src/main/jniLibs',
                 'APP_BUILD_SCRIPT=src/main/jni/Android.mk',
@@ -28,7 +29,8 @@ android {
     }
 
     task ndkClean(type: Exec, description: 'Clean JNI via NDK') {
-        commandLine "ndk-build.cmd",
+        def ndkDir = android.ndkDirectory.getAbsolutePath()
+        commandLine ndkDir + "/ndk-build.cmd",
                 'clean',
                 'NDK_PROJECT_PATH=build/intermediates/ndk',
                 'NDK_LIBS_OUT=src/main/jniLibs',
