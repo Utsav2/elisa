@@ -12,7 +12,16 @@ Java_uiuc_bioassay_elisa_ELISAApplication_cleanFolder(JNIEnv *env, jclass,
   env->ReleaseStringUTFChars(jstr, path);
 }
 
-JNIEXPORT jint JNICALL 
+JNIEXPORT jint JNICALL
+Java_uiuc_bioassay_elisa_ELISAApplication_processVideo(JNIEnv *env, jclass,
+                                                         jstring jstr) {
+  const char *path = env->GetStringUTFChars(jstr, nullptr);
+  int ret = -1;
+  env->ReleaseStringUTFChars(jstr, path);
+  return ret;
+}
+
+JNIEXPORT jint JNICALL
 Java_uiuc_bioassay_elisa_ELISAApplication_processBB(JNIEnv *env, jclass,
                                                          jstring jstr) {
   const char *path = env->GetStringUTFChars(jstr, nullptr);

@@ -26,6 +26,7 @@ public class ELISAApplication extends Application {
     public static final String ACTION_ONE_SAMPLE = "ONE_SAMPLE";
     public static final String ACTION_MULTIPLE_SAMPLE = "MULTIPLE_SAMPLE";
     public static final String MODE_EXTRA = "MODE_EXTRA";
+    public static final String VIDEO_EXTRA = "VIDEO_EXTRA";
     public static final String MODE_ABSORPTION = "ABSORPTION";
     public static final String MODE_FLUORESCENT = "FLUORESCENT";
     public static final String MODE_ELISA = "ELISA";
@@ -69,6 +70,7 @@ public class ELISAApplication extends Application {
 
     /* Native signatures */
     public native static void cleanFolder(String folder);
+    public native static int processVideo(String videoFile);
     public native static int processBB(String folder);
     public native static int processSample(String folder, int action);
     public native static double[] readRGBSpec(String folder);

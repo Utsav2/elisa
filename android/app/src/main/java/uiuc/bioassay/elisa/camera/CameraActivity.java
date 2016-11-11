@@ -249,6 +249,13 @@ public class CameraActivity extends AppCompatActivity implements
                             buttonCapture.setText(R.string.capture);
                             isCapturing = false;
                             stopRecording();
+                            exportLocationToFile();
+                            Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
+                            intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
+                            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
+                            intent.putExtra(ELISAApplication.VIDEO_EXTRA, getOutputVideoFile(folder).getAbsolutePath());
+                            startActivity(intent);
+                            finish();
                         }
                         else if (isFluorescent) {
                             buttonCapture.setText(R.string.stop_capturing);

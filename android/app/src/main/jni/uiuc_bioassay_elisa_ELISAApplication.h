@@ -21,6 +21,15 @@ extern "C" {
 JNIEXPORT void JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_cleanFolder
   (JNIEnv *, jclass, jstring);
 
+
+/*
+ * Class:     uiuc_bioassay_elisa_ELISAApplication
+ * Method:    processVideo
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_uiuc_bioassay_elisa_ELISAApplication_processVideo
+  (JNIEnv *, jclass, jstring);
+
 /*
  * Class:     uiuc_bioassay_elisa_ELISAApplication
  * Method:    processBB

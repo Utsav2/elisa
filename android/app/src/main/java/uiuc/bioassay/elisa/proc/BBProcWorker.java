@@ -28,6 +28,7 @@ import static uiuc.bioassay.elisa.ELISAApplication.processBB;
  * Created by meowle on 7/8/15.
  */
 public class BBProcWorker extends AsyncTask<String, Void, Integer> {
+
     private Context mContext;
     private ProgressDialog progressDialog;
     private String folder;
