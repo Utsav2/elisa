@@ -9,6 +9,12 @@
         android:layout_height="match_parent"
         >
     </FrameLayout>
+    <SurfaceView
+        android:id="@+id/surface_camera"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        />
 
     <TextView
         android:layout_width="fill_parent"
@@ -23,7 +29,7 @@
 
     <Button
         android:id="@+id/button_capture"
-        android:text="Capture"
+        android:text="@string/capture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
