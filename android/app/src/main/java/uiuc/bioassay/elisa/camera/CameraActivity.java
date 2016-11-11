@@ -46,7 +46,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.location.Location;
+import android.media.CamcorderProfile;
 import android.media.MediaActionSound;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -54,6 +56,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -82,21 +86,25 @@ import uiuc.bioassay.elisa.proc.SampleProcActivity;
 
 @SuppressWarnings("deprecation")
 public class CameraActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SurfaceHolder.Callback {
     private static final String TAG = "CAMERA";
 
     private Camera mCamera;
     private CameraPreview mPreview;
     private FrameLayout preview;
+    private MediaRecorder mRecorder;
     private Button buttonCapture;
     private String folder;
     private String action;
     private int intExtra;
     private int procMode;
+    private String modeExtra;
 
     private TextView instructions;
     private TextView title;
+    private SurfaceView surfaceView;
 
+    private boolean isCapturing = false;
     private int picCount = 0;
     private StartPictureSeriesSound startSeriesSound = new StartPictureSeriesSound();
     private StopPictureSeriesSound stopSeriesSound = new StopPictureSeriesSound();
@@ -137,7 +145,7 @@ public class CameraActivity extends AppCompatActivity implements
                     if (action.equals(ELISAApplication.ACTION_BROADBAND)) {
                         exportLocationToFile();
                         Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
-                        intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                         startActivity(intent);
                     } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE)){
@@ -218,8 +226,16 @@ public class CameraActivity extends AppCompatActivity implements
         action = getIntent().getAction();
         intExtra = getIntent().getIntExtra(ELISAApplication.INT_EXTRA, -1);
         procMode = getIntent().getIntExtra(ELISAApplication.ELISA_PROC_MODE, 0);
+        modeExtra = getIntent().getStringExtra(ELISAApplication.MODE_EXTRA);
         Log.d(TAG, folder);
         Log.d(TAG, action);
+
+        final boolean isFluorescent = modeExtra.equals(ELISAApplication.MODE_FLUORESCENT);
+        // surfaceView = (SurfaceView)findViewById(R.id.surface_camera);
+        // surfaceView.setEnabled(false);
+        // surfaceView.getHolder().addCallback(this);
+        // surfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
         // Open camera
         openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
 
@@ -229,9 +245,20 @@ public class CameraActivity extends AppCompatActivity implements
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        buttonCapture.setEnabled(false);
-                        startSeriesSound.play();
-                        mCamera.takePicture(null, null, mPicture);
+                        if (isCapturing) {
+                            buttonCapture.setText(R.string.capture);
+                            isCapturing = false;
+                            stopRecording();
+                        }
+                        else if (isFluorescent) {
+                            buttonCapture.setText(R.string.stop_capturing);
+                            isCapturing = true;
+                            startRecording();
+                        } else {
+                            buttonCapture.setEnabled(false);
+                            startSeriesSound.play();
+                            mCamera.takePicture(null, null, mPicture);
+                        }
                     }
                 }
         );
@@ -250,6 +277,43 @@ public class CameraActivity extends AppCompatActivity implements
         // Kick off the process of building a GoogleApiClient and requesting the LocationServices
         // API.
         buildGoogleApiClient();
+    }
+
+    protected void startRecording() {
+        releaseCamera();
+
+        mRecorder = new MediaRecorder();  // Works well
+
+        mRecorder.setCamera(mCamera);
+
+        mRecorder.setPreviewDisplay(surfaceView.getHolder().getSurface());
+        mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+
+        mRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+        mRecorder.setOutputFile("/sdcard/zzzz.3gp");
+
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e(TAG, "Exception in trying to prepare mediaRecorder", e);
+        }
+        mRecorder.start();
+    }
+
+    protected void stopRecording() {
+        mRecorder.stop();
+        mRecorder.release();
+        mCamera.release();
+    }
+
+    private void releaseMediaRecorder(){
+        if (mRecorder != null) {
+            mRecorder.reset();   // clear recorder configuration
+            mRecorder.release(); // release the recorder object
+            mRecorder = null;
+            mCamera.lock();           // lock camera for later use
+        }
     }
 
     /*
@@ -498,11 +562,13 @@ public class CameraActivity extends AppCompatActivity implements
 
     /** A safe way to get an instance of the Camera object. */
     private static Camera getCameraInstance(int cameraId){
+        Log.d(TAG, "Attempting to get camera instance");
         Camera c = null;
         try {
             c = Camera.open(cameraId); // attempt to get a Camera instance
         }
         catch (Exception e){
+            Log.e(TAG, "", e);
             // Camera is not available (in use or does not exist)
         }
         return c; // returns null if elisa is unavailable
@@ -606,7 +672,7 @@ public class CameraActivity extends AppCompatActivity implements
         // Set white balance
         params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
 
-        if (getIntent().getStringExtra(ELISAApplication.MODE_EXTRA).equals(ELISAApplication.MODE_FLUORESCENT)) {
+        if (modeExtra.equals(ELISAApplication.MODE_FLUORESCENT)) {
             // Set flash
             params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             // Set iso
@@ -638,6 +704,20 @@ public class CameraActivity extends AppCompatActivity implements
 
         preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+
     }
 
     /** Shutter Start Series Sound */
