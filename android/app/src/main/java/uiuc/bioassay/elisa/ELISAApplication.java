@@ -2,8 +2,11 @@ package uiuc.bioassay.elisa;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.os.Environment;
 import android.provider.Settings;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.view.inputmethod.InputMethodManager;
 
 import java.math.BigDecimal;
@@ -15,6 +18,12 @@ import java.math.RoundingMode;
 public class ELISAApplication extends Application {
     static {
         System.loadLibrary("elisa");
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     public static final String FOLDER_EXTRA = "FOLDER_EXTRA";
