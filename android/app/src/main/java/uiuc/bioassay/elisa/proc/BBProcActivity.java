@@ -71,6 +71,12 @@ public class BBProcActivity extends AppCompatActivity {
                             intent.putExtra(ELISAApplication.MODE_EXTRA, mode);
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getParent() + File.separator + ELISAApplication.SAMPLE_FOLDER);
                             startActivity(intent);
+                        } else if (mode.equals(ELISAApplication.MODE_FLUORESCENT)) {
+                            Intent intent = new Intent(BBProcActivity.this, CameraActivity.class);
+                            intent.setAction(ELISAApplication.ACTION_VIDEO_SAMPLE);
+                            intent.putExtra(ELISAApplication.MODE_EXTRA, mode);
+                            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder.getParent() + File.separator + ELISAApplication.SAMPLE_FOLDER);
+                            startActivity(intent);
                         } else if (mode.equals(ELISAApplication.MODE_ELISA)) {
                             Intent intent = new Intent(BBProcActivity.this, ELISASetupActivity.class);
                             intent.putExtra(ELISAApplication.MODE_EXTRA, mode);
@@ -155,15 +161,13 @@ public class BBProcActivity extends AppCompatActivity {
                 }
         );
 
-        if (mode.equals(ELISAApplication.MODE_FLUORESCENT)) {
-            FluoroscentWorker worker = new FluoroscentWorker(this);
-            worker.execute(folder.getAbsolutePath(), getIntent().getStringExtra(ELISAApplication.VIDEO_EXTRA));
-        } else {
-            BBProcWorker bbProcWorker = new BBProcWorker(this);
-            // bbProcWorker.execute("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb");
-            // TODO: Enable the below in production
-            bbProcWorker.execute(folder.getAbsolutePath());
-        }
+        BBProcWorker bbProcWorker = new BBProcWorker(this);
+
+
+
+        // bbProcWorker.execute("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/bb");
+        // TODO: Enable the below in production
+        bbProcWorker.execute(folder.getAbsolutePath());
     }
 
     @Override

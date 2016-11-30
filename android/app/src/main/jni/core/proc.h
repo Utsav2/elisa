@@ -21,9 +21,11 @@ matrix<uint8_t, N> avg_folder(const char *path_name, const char *avg_file_name,
   }
 
   std::vector<matrix<uint8_t, N>> images(num_images);
+
   for (size_t i = 0; i < num_images; ++i) {
     images[i] = imread<uint8_t, N>(path + std::to_string(i + 1) + ".jpg");
   }
+
   matrix<uint8_t, N> empty_mat{};
   if (images[0].size() == 0) {
     return empty_mat;

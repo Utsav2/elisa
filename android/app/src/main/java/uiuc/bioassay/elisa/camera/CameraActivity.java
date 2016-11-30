@@ -62,7 +62,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -88,7 +87,7 @@ import uiuc.bioassay.elisa.proc.SampleProcActivity;
 public class CameraActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SurfaceHolder.Callback {
     private static final String TAG = "CAMERA";
-
+    private boolean isVideoMode;
     private Camera mCamera;
     private CameraPreview mPreview;
     private FrameLayout preview;
@@ -230,8 +229,8 @@ public class CameraActivity extends AppCompatActivity implements
         Log.d(TAG, folder);
         Log.d(TAG, action);
 
-        // TODO(utsav): null pointers when clicking the Done button after processing
-        final boolean isFluorescent = modeExtra.equals(ELISAApplication.MODE_FLUORESCENT);
+        isVideoMode = action.equals(ELISAApplication.ACTION_VIDEO_SAMPLE);
+
         surfaceView = (SurfaceView)findViewById(R.id.surface_camera);
         surfaceView.setEnabled(false);
         surfaceView.getHolder().addCallback(this);
@@ -251,14 +250,14 @@ public class CameraActivity extends AppCompatActivity implements
                             isCapturing = false;
                             stopRecording();
                             exportLocationToFile();
-                            Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
+                            Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
                             intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                             intent.putExtra(ELISAApplication.VIDEO_EXTRA, getOutputVideoFile(folder).getAbsolutePath());
                             startActivity(intent);
                             finish();
                         }
-                        else if (isFluorescent) {
+                        else if (isVideoMode) {
                             buttonCapture.setText(R.string.stop_capturing);
                             isCapturing = true;
                             startRecording();
@@ -519,7 +518,7 @@ public class CameraActivity extends AppCompatActivity implements
         }
         if (action.equals(ELISAApplication.ACTION_BROADBAND)) {
             title.setText("Broadband Screen");
-        } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE) || action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
+        } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE) || action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE) || action.equals(ELISAApplication.ACTION_VIDEO_SAMPLE)) {
             title.setText("Sample Screen");
         }
     }
@@ -690,7 +689,7 @@ public class CameraActivity extends AppCompatActivity implements
         params.setExposureCompensation(0);
 
 
-        if (modeExtra.equals(ELISAApplication.MODE_FLUORESCENT)) {
+        if (isVideoMode) {
             params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT);
             // Set flash
             params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);

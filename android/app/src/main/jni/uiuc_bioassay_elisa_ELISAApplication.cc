@@ -30,6 +30,15 @@ Java_uiuc_bioassay_elisa_ELISAApplication_processBB(JNIEnv *env, jclass,
   return ret;
 }
 
+JNIEXPORT jint JNICALL
+        Java_uiuc_bioassay_elisa_ELISAApplication_processF(JNIEnv *env, jclass,
+                                                            jstring jstr) {
+const char *path = env->GetStringUTFChars(jstr, nullptr);
+int ret = elisa::process_fluoroscent(path);
+env->ReleaseStringUTFChars(jstr, path);
+return ret;
+}
+
 JNIEXPORT jdoubleArray JNICALL 
 Java_uiuc_bioassay_elisa_ELISAApplication_readRGBSpec
   (JNIEnv *env, jclass, jstring jstr) {

@@ -3,12 +3,18 @@ package uiuc.bioassay.elisa.proc;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.*;
 
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -17,6 +23,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
+import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
 
 import java.io.File;
@@ -32,18 +39,18 @@ import java.util.PriorityQueue;
 import static org.bytedeco.javacpp.opencv_core.CV_16S;
 import static org.bytedeco.javacpp.opencv_core.cvOpenFileStorage;
 import static org.bytedeco.javacpp.opencv_core.minMaxLoc;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.accumulate;
-
-/**
- * Created by utsav on 11/11/2016.
- */
+import static uiuc.bioassay.elisa.ELISAApplication.processBB;
+import static uiuc.bioassay.elisa.ELISAApplication.processF;
 
 public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
 
-    private Context mContext;
-    private ProgressDialog progressDialog;
-    private String folder;
     private static final String TAG = "FluoroscentWorker";
+
+    protected Context mContext;
+    protected ProgressDialog progressDialog;
+    protected String folder;
 
     public FluoroscentWorker(Context context) {
         mContext = context;
@@ -64,10 +71,14 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
         folder = params[0];
         String videoFile = params[1];
         // TODO(utsav) replace this with actual camera footage
-        return startProcessingVideo(a("MOV_0051.MP4"));
+        startProcessingVideo(assetToVideoFile("MOV_0051.MP4"));
+        int ret = processF(folder + File.separator);
+        Log.d(TAG, "here " + ret);
+        return ret;
     }
 
-    private String a(String name) {
+    // a helper method only present to test the code with a pre-existing mp4 asset
+    private String assetToVideoFile(String name) {
         File cacheFile = new File(mContext.getCacheDir(), name);
         try {
             InputStream inputStream = mContext.getAssets().open(name);
@@ -96,42 +107,44 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
         Mat m;
         final int index;
         double mean;
-        public MatrixInfo(Mat m, int index, double mean) {
+        MatrixInfo(Mat m, int index, double mean) {
             this.m = m;
             this.index = index;
             this.mean = mean;
         }
 
         // when we don't need the mean
-        public MatrixInfo(Mat m, int index) {
+        MatrixInfo(Mat m, int index) {
             this(m, index, -1);
         }
     }
 
     // used to sort matrices based on when we saw them
-    static class MatrixIndexComparator implements Comparator<MatrixInfo> {
+    private static class MatrixIndexComparator implements Comparator<MatrixInfo> {
         @Override
         public int compare(MatrixInfo matrixInfo, MatrixInfo t1) {
             return matrixInfo.index - t1.index;
         }
     }
 
-    static class MatrixMeanComparator implements Comparator<MatrixInfo> {
-
+    // helps to get the frames with highest mean values
+    private static class MatrixMeanComparator implements Comparator<MatrixInfo> {
         @Override
         public int compare(MatrixInfo o1, MatrixInfo o2) {
             return (int) (o2.mean - o1.mean);
         }
     }
 
-    private int startProcessingVideo(String videoFile) {
+    private void startProcessingVideo(String videoFile) {
         FFmpegFrameGrabber videoGrabber = new FFmpegFrameGrabber(videoFile);
         videoGrabber.setFormat("mp4");
         OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-        int MAX_COUNT = 8;
         List<MatrixInfo> mats = new ArrayList<>();
-        // initial capacity, comparator
-        PriorityQueue<MatrixInfo> q = new PriorityQueue<>(MAX_COUNT, new MatrixMeanComparator());
+        PriorityQueue<MatrixInfo> infoPriorityQueue = new PriorityQueue<>(
+                ELISAApplication.MAX_PICTURE, // initial capacity
+                new MatrixMeanComparator()
+        );
+
         try {
             videoGrabber.start();
         } catch (FrameGrabber.Exception e) {
@@ -156,7 +169,7 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
                     main._deallocate();
                     continue;
                 }
-                // this is a heavy operation, that for some reason even on deallocation
+                // this is assetToVideoFile heavy operation, that for some reason even on deallocation
                 // takes up memory (enough to force Android to kill the app -- after killing
                 // other processes). I'm not sure if it's simply creation of the mat objects,
                 // it's probably the conversion
@@ -167,28 +180,28 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
                 main._deallocate();
                 mat._deallocate();
                 m._deallocate();
-                MatrixInfo t = new MatrixInfo(mat, count, mean);
-                Log.d(TAG, "count: " + count + "mean: " + t.mean);
-                mats.add(t);
+                MatrixInfo matrixInfo = new MatrixInfo(mat, count, mean);
+                Log.v(TAG, "count: " + count + "mean: " + matrixInfo.mean);
+                mats.add(matrixInfo);
                 if (mean > max) {
                     max = mean;
                 }
-                q.add(t);
+                infoPriorityQueue.add(matrixInfo);
                 count++;
             } catch (FrameGrabber.Exception e) {
-                Log.e(TAG, "exception in retreiving a frame", e);
+                Log.e(TAG, "exception in retreiving assetToVideoFile frame", e);
                 break;
             }
         };
 
         double threshold = 0.2 * max;
-        Log.d(TAG, "threshold: " + threshold);
+        Log.v(TAG, "threshold: " + threshold);
 
-        ArrayList<MatrixInfo> outs = new ArrayList<>();
+        List<MatrixInfo> outs = new ArrayList<>();
 
-        for (int i = 0; i < MAX_COUNT; i++) {
-            List<Mat> framesToAverage = new ArrayList<Mat>();
-            MatrixInfo t = q.remove();
+        for (int i = 0; i < ELISAApplication.MAX_PICTURE; i++) {
+            List<Mat> framesToAverage = new ArrayList<>();
+            MatrixInfo t = infoPriorityQueue.remove();
             framesToAverage.add(t.m);
             // now remove from the sides of this peak until we reach threshold
             int leftIndex = t.index - 1;
@@ -198,7 +211,7 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
                 if (m.mean < threshold) {
                     break;
                 }
-                q.remove(m);
+                infoPriorityQueue.remove(m);
                 framesToAverage.add(m.m);
             }
 
@@ -207,29 +220,25 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
                 if (m.mean < threshold) {
                     break;
                 }
-                q.remove(m);
-
-                // imwrite("C:\\Users\\utsav\\Pictures\\images\\img" + i + "-debug-" + d + ".jpg", m.m);
+                infoPriorityQueue.remove(m);
                 framesToAverage.add(m.m);
             }
-            Log.d(TAG, "averaging between " + framesToAverage.size() + " images");
+            Log.v(TAG, "averaging between " + framesToAverage.size() + " images");
             outs.add(new MatrixInfo(getAverage(framesToAverage), t.index));
         }
 
         Collections.sort(outs, new MatrixIndexComparator());
         for (int i = 0; i < outs.size(); i++){
- //           imwrite("C:\\Users\\utsav\\Pictures\\images\\img" + i + ".jpg", outs.get(i).m);
+            String path = folder + File.separator + (i+1) + "/";
+            new File(path).mkdirs();
+            String f = path + "image.jpg";
+            Log.v(TAG, "Saving image at: " + f);
+            imwrite(f, outs.get(i).m);
         }
-
-        // for (int i = 0; i < MAX_COUNT; i++) {
-        //     MatrixInfo t = mats.get((int)(Math.random() * MAX_COUNT));
-        //     imwrite("C:\\Users\\utsav\\Pictures\\images\\img" + i + ".jpg", t.m);
-        // }
         Log.d(TAG, "Done saving images");
-        return -1;
     }
 
-    // manually gets the averages of a list of matrices
+    // manually gets the averages of assetToVideoFile list of matrices
     // we implemented this by hand because the inbuilt accumulate only works with floats
     // and we wanted to shrink the size of our data
     private static Mat getAverage(List<Mat> mats) {
@@ -245,9 +254,10 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
         return opencv_core.multiply(expr.asMat(), 1.0/mats.size()).asMat();
     }
 
+    int current = 1;
+
     @Override
     protected void onPostExecute(Integer result) {
-        Log.d(TAG, "In postexecute");
         progressDialog.dismiss();
         Activity activity = (Activity) mContext;
         BBProcActivity bbProcActivity = (BBProcActivity) activity;
@@ -256,11 +266,31 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
         }
         if (result == -1) {
             TextView textView = (TextView) bbProcActivity.findViewById(R.id.text_result);
-            textView.setText("Error, could not process the video correctly!");
+            textView.setText("Error, unable to process data!");
             bbProcActivity.setCurrResult(result);
             return;
         }
-        BBProcWorker worker = new BBProcWorker(bbProcActivity);
-        worker.execute(folder);
+
+        final ImageView imageView = (ImageView) bbProcActivity.findViewById(R.id.imageView);
+        imageView.setImageBitmap(decodeIMG(folder + "/1/image.jpg"));
+
+        Button previous = (Button) bbProcActivity.findViewById(R.id.previous);
+        previous.setVisibility(View.VISIBLE);
+
+        Button next = (Button) bbProcActivity.findViewById(R.id.next);
+        next.setVisibility(View.VISIBLE);
+
+        Button button = (Button) bbProcActivity.findViewById(R.id.image_button);
+        button.setEnabled(false);
+        bbProcActivity.setResult(result);
+    }
+
+    private static Bitmap decodeIMG(String img) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 4;
+        Bitmap bitmap = BitmapFactory.decodeFile(img, options);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 }

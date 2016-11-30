@@ -29,6 +29,7 @@ import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
 
 import static uiuc.bioassay.elisa.ELISAApplication.AVG_FILE_NAME;
+import static uiuc.bioassay.elisa.ELISAApplication.VIDEO_EXTRA;
 import static uiuc.bioassay.elisa.ELISAApplication.readBBResNormalized;
 import static uiuc.bioassay.elisa.ELISAApplication.readRGBSpec;
 import static uiuc.bioassay.elisa.ELISAApplication.readSampleResNormalized;
@@ -107,7 +108,6 @@ public class SampleProcActivity extends AppCompatActivity {
                                 Log.d(TAG, "" + a + ", " + b);
                                 resAbsData = (b/(a + b)) * absData[idx - 1] + (a / (a + b)) * absData[idx];
                             }
-                            Log.d(TAG, "xxxxxxzzzzz: " + intent.getIntExtra(ELISAApplication.INT_EXTRA, -1));
                             ELISAApplication.currentSampleIdx = intent.getIntExtra(ELISAApplication.INT_EXTRA, -1);
                             ELISAApplication.resultSampleAbs = resAbsData;
                         }
@@ -246,6 +246,9 @@ public class SampleProcActivity extends AppCompatActivity {
             sampleProcWorker.execute(folder.getAbsolutePath(), ELISAApplication.ACTION_MULTIPLE_SAMPLE);
         } else if (intent.getAction().equals(ELISAApplication.ACTION_ONE_SAMPLE)){
             sampleProcWorker.execute(folder.getAbsolutePath(), ELISAApplication.ACTION_ONE_SAMPLE);
+        } else if(intent.getAction().equals(ELISAApplication.ACTION_VIDEO_SAMPLE)) {
+            new FluoroscentWorker(this).execute(folder.getAbsolutePath(),
+                    getIntent().getExtras().getString(VIDEO_EXTRA));
         }
     }
 

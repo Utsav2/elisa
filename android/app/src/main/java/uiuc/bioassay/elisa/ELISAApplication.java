@@ -34,6 +34,7 @@ public class ELISAApplication extends Application {
     public static final String ACTION_BROADBAND = "BROADBAND";
     public static final String ACTION_ONE_SAMPLE = "ONE_SAMPLE";
     public static final String ACTION_MULTIPLE_SAMPLE = "MULTIPLE_SAMPLE";
+    public static final String ACTION_VIDEO_SAMPLE = "VIDEO_SAMPLE";
     public static final String MODE_EXTRA = "MODE_EXTRA";
     public static final String VIDEO_EXTRA = "VIDEO_EXTRA";
     public static final String MODE_ABSORPTION = "ABSORPTION";
@@ -81,6 +82,7 @@ public class ELISAApplication extends Application {
     public native static void cleanFolder(String folder);
     public native static int processVideo(String videoFile);
     public native static int processBB(String folder);
+    public native static int processF(String folder);
     public native static int processSample(String folder, int action);
     public native static double[] readRGBSpec(String folder);
     public native static double[] readBBResNormalized(String folder);
