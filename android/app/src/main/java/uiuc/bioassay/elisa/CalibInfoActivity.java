@@ -66,6 +66,19 @@ public class CalibInfoActivity extends ActionBarActivity {
                     }
                 }
         );
+
+        Button newXModeButton = (Button) findViewById(R.id.new_x_exp);
+        newXModeButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(CalibInfoActivity.this, ExpIntroActivity.class);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, ELISAApplication.MODE_X);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+        );
     }
 
     @Override

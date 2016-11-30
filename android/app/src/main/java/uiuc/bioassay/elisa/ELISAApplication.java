@@ -29,6 +29,7 @@ public class ELISAApplication extends Application {
     public static final String MODE_ABSORPTION = "ABSORPTION";
     public static final String MODE_FLUORESCENT = "FLUORESCENT";
     public static final String MODE_ELISA = "ELISA";
+    public static final String MODE_X = "X";
 
     public static double RED_LASER_PEAK = 1016.037828;
     public static double GREEN_LASER_PEAK = 1443.327951;

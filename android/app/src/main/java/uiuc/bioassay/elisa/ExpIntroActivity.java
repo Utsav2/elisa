@@ -62,6 +62,8 @@ public class ExpIntroActivity extends AppCompatActivity {
             newExpWelcome.setText("New Fluorescent Experiment");
         } else if (mode.equals(ELISAApplication.MODE_ELISA)) {
             newExpWelcome.setText("New ELISA Experiment");
+        } else if (mode.equals(ELISAApplication.MODE_X)) {
+            newExpWelcome.setText("New X Experiment");
         }
 
         expName = (EditText) findViewById(R.id.exp_name);

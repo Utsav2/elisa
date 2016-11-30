@@ -143,14 +143,14 @@ fp_t fit_circle(const std::vector<Point<T>> &p, Circle &circle) {
 template <typename ForwardIterator, typename OutputIt1, typename OutputIt2>
 inline void
 get_normalized_coeffs_and_mask(ForwardIterator first, ForwardIterator last,
-                               OutputIt1 mask_first, OutputIt2 d_first) {
+                               OutputIt1 mask_first, OutputIt2 d_first, bool fluoroscent = false) {
   while (first != last) {
     auto r = *first;
     auto g = *++first;
     auto b = *++first;
     bool is_noise = (r < thr_noise) && (g < thr_noise) && (b < thr_noise);
     *mask_first = !is_noise;
-    fp_t denom = r * r + g * g + b * b;
+    fp_t denom = fluoroscent ? 1 : r * r + g * g + b * b;
     *d_first = is_noise ? 0 : (r / denom);
     *(++d_first) = is_noise ? 0 : (g / denom);
     *(++d_first) = is_noise ? 0 : (b / denom);
@@ -179,12 +179,29 @@ void get_normalized_data(ForwardIterator1 first1, ForwardIterator1 last1,
   }
 }
 
-int process_bb(const std::string &path) noexcept {
-  matrix3<uint8_t> bb_im = avg_folder<MAX_PICTURE>(
-      path, AVG_FILE_NAME, Margin{left_off, right_off, 0, 0});
-  if (is_empty(bb_im)) {
-    println_e("Couldn't load sample image");
-    return -1;
+int process_fluoroscent(const std::string &path) noexcept {
+  for (size_t i = 0; i < 8; ++i) {
+    int ret = process_bb(path + std::to_string(i+1) + "/", true);
+    if (ret < 0) {
+      return ret;
+    }
+  }
+  return 0;
+}
+
+int process_bb(const std::string &path, bool fluoroscent) noexcept {
+  matrix3<uint8_t> bb_im;
+  if (fluoroscent) {
+    println_e(path);
+    bb_im = imread<uint8_t, 3>(path + "image.jpg");
+  }
+  else {
+    bb_im = avg_folder<MAX_PICTURE>(
+        path, AVG_FILE_NAME, Margin{left_off, right_off, 0, 0});
+    if (is_empty(bb_im)) {
+      println_e("Couldn't load sample image");
+      return -1;
+    } 
   }
 
   auto bb_gray = rgb2gray(bb_im);
@@ -237,8 +254,9 @@ int process_bb(const std::string &path) noexcept {
 
   matrix3<fp_t> coeffs(bb_roi.descriptor());
   mask = matrix2<logical>(coeffs.size(0), coeffs.size(1));
-  get_normalized_coeffs_and_mask(bb_roi.begin(), bb_roi.end(), mask.begin(),
-                                 coeffs.begin());
+
+	get_normalized_coeffs_and_mask(bb_roi.begin(), bb_roi.end(), mask.begin(),
+			coeffs.begin());
 
   // Calculate broadband
   col_end += 1;
@@ -287,7 +305,7 @@ int process_bb(const std::string &path) noexcept {
   // Write rgb spectrum to file
   std::fstream ofs_rgb_spec(path + RGB_SPEC, std::ios::out | std::ios::binary);
   if (!ofs_rgb_spec.good()) {
-    println_e("Couldn't open broadband rgb spectrum file to write");
+		println_e("Couldn't open broadband rgb spectrum file to write");
     return -1;
   }
 
@@ -334,10 +352,10 @@ int process_bb(const std::string &path) noexcept {
   ofs.write(reinterpret_cast<char *>(&height), sizeof(height));
   ofs.write(reinterpret_cast<char *>(&width), sizeof(width));
   ofs.write(reinterpret_cast<char *>(&depth), sizeof(depth));
-  for (auto first = coeffs.begin(), last = coeffs.end(); first != last;
-       ++first) {
-    ofs.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
-  }
+	for (auto first = coeffs.begin(), last = coeffs.end(); first != last;
+			++first) {
+		ofs.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
+	}
   ofs.close();
   return 0;
 }
@@ -359,7 +377,7 @@ int process_sample(const std::string &path, int action) noexcept {
   if (!ifs.good()) {
     println_e("Couldn't open broadband file to read");
     std::string s = root + BB_FOLDER + BB_DATA + " Couldn't open broadband file to read";
-    LOGD("%s\n", s.c_str());
+    // LOGD("%s\n", s.c_str());
     return -1;
   }
   size_t top_off;
@@ -393,7 +411,7 @@ int process_sample(const std::string &path, int action) noexcept {
   std::fstream ifs_res(root + BB_FOLDER + RES, std::ios::in | std::ios::binary);
   if (!ifs_res.good()) {
     println_e("Couldn't open broadband result file to read");
-    LOGD("Couldn't open broadband result file to read");
+    // LOGD("Couldn't open broadband result file to read");
     return -1;
   }
   ifs_res.read(reinterpret_cast<char *>(&col_end), sizeof(col_end));
@@ -485,10 +503,10 @@ int process_sample(const std::string &path, int action) noexcept {
 
   println_i(std::fixed,
             std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
-  LOGD("%f", std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
+  // LOGD("%f", std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
   println_i(std::fixed,
             std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
-  LOGD("%f", std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
+  // LOGD("%f", std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
 
   // Write result to file
   std::fstream ofs_res(path + RES, std::ios::out | std::ios::binary);
