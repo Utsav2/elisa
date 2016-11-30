@@ -147,7 +147,7 @@ const INT32 jpeg_aritab[113+1] = {
   V( 112, 0x59eb, 112, 111, 1 ),
 /*
  * This last entry is used for fixed probability estimate of 0.5
- * as recommended in Section 10.3 Table 5 of ITU-T Rec. T.851.
+ * as recommended in Section 10.3 Table 5 of ITU-MatrixInfo Rec. MatrixInfo.851.
  */
   V( 113, 0x5a1d, 113, 113, 0 )
 };

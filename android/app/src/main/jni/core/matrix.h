@@ -747,7 +747,7 @@ private:
 };
 
 // Zero-Dimension matrix_ref
-// The type matrix_ref<T, 0> is not really a matrix. It contains a pointer
+// The type matrix_ref<MatrixInfo, 0> is not really a matrix. It contains a pointer
 // to an element in a matrix.
 
 template <typename T> class matrix_ref<T, 0> {
@@ -775,7 +775,7 @@ private:
 //------------------------------------------------------------------------------
 //                                matrix
 // Template parameters:
-//     T -- Type of matrix elements.
+//     MatrixInfo -- Type of matrix elements.
 //     N -- Dimension of the matrix.
 //
 // Sample contructor usages:
@@ -1079,8 +1079,8 @@ private:
 };
 
 // Zero-Dimension Matrix
-// The type matrix<T, 0> is not really a matrix. It stores a single scalar
-// of type T and can only be converted to a reference to that type.
+// The type matrix<MatrixInfo, 0> is not really a matrix. It stores a single scalar
+// of type MatrixInfo and can only be converted to a reference to that type.
 
 template <typename T> class matrix<T, 0> {
 public:
@@ -1200,7 +1200,7 @@ operator^(const M &m, int n) {
 template <typename M, typename T>
 inline enable_if_t<is_matrix<M>(), matrix<logical, M::order>>
 operator<=(const M &m, const T &x) {
-  // using value_t = common_type_t<typename M::value_type, T>;
+  // using value_t = common_type_t<typename M::value_type, MatrixInfo>;
   matrix<logical, M::order> ret(m.descriptor());
   auto p = ret.begin();
   for (auto first = m.begin(), last = m.end(); first != last; ++first) {
@@ -1214,7 +1214,7 @@ operator<=(const M &m, const T &x) {
 template <typename M, typename T>
 inline enable_if_t<is_matrix<M>(), matrix<logical, M::order>>
 operator<(const M &m, const T &x) {
-  // using value_t = common_type_t<typename M::value_type, T>;
+  // using value_t = common_type_t<typename M::value_type, MatrixInfo>;
   matrix<logical, M::order> ret(m.descriptor());
   auto p = ret.begin();
   for (auto first = m.begin(), last = m.end(); first != last; ++first) {
@@ -1228,7 +1228,7 @@ operator<(const M &m, const T &x) {
 template <typename M, typename T>
 inline enable_if_t<is_matrix<M>(), matrix<logical, M::order>>
 operator>=(const M &m, const T &x) {
-  // using value_t = common_type_t<typename M::value_type, T>;
+  // using value_t = common_type_t<typename M::value_type, MatrixInfo>;
   matrix<logical, M::order> ret(m.descriptor());
   auto p = ret.begin();
   for (auto first = m.begin(), last = m.end(); first != last; ++first) {
@@ -1242,7 +1242,7 @@ operator>=(const M &m, const T &x) {
 template <typename M, typename T>
 inline enable_if_t<is_matrix<M>(), matrix<logical, M::order>>
 operator>(const M &m, const T &x) {
-  // using value_t = common_type_t<typename M::value_type, T>;
+  // using value_t = common_type_t<typename M::value_type, MatrixInfo>;
   matrix<logical, M::order> ret(m.descriptor());
   auto p = ret.begin();
   for (auto first = m.begin(), last = m.end(); first != last; ++first) {
@@ -1267,15 +1267,15 @@ enable_if_t<is_matrix<M>(), std::ostream &> operator<<(std::ostream &os,
   return (os << '}');
 }
 
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const matrix_ref<T, 0> &mr) {
-  os << static_cast<T>(mr);
+template <typename MatrixInfo>
+std::ostream &operator<<(std::ostream &os, const matrix_ref<MatrixInfo, 0> &mr) {
+  os << static_cast<MatrixInfo>(mr);
   return os;
 }
 
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const matrix<T, 0> &m) {
-  os << static_cast<T>(m);
+template <typename MatrixInfo>
+std::ostream &operator<<(std::ostream &os, const matrix<MatrixInfo, 0> &m) {
+  os << static_cast<MatrixInfo>(m);
   return os;
 }
 #endif

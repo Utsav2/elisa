@@ -230,6 +230,7 @@ public class CameraActivity extends AppCompatActivity implements
         Log.d(TAG, folder);
         Log.d(TAG, action);
 
+        // TODO(utsav): null pointers when clicking the Done button after processing
         final boolean isFluorescent = modeExtra.equals(ELISAApplication.MODE_FLUORESCENT);
         surfaceView = (SurfaceView)findViewById(R.id.surface_camera);
         surfaceView.setEnabled(false);

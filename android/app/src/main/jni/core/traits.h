@@ -38,7 +38,7 @@ using common_type_t = typename std::common_type<T...>::type;
 
 struct subst_failure {};
 
-// Returns true if T does not indicate a substitution failure.
+// Returns true if MatrixInfo does not indicate a substitution failure.
 template <typename T> constexpr bool subst_succeeded() {
   return !std::is_same<T, subst_failure>::value;
 }

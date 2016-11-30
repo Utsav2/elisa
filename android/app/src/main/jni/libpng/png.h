@@ -275,7 +275,7 @@
  * with testing, bug fixes, and patience.  This wouldn't have been
  * possible without all of you.
  *
- * Thanks to Frank J. T. Wojcik for helping with the documentation.
+ * Thanks to Frank J. MatrixInfo. Wojcik for helping with the documentation.
  */
 
 /*

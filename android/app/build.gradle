@@ -19,6 +19,7 @@ android {
         }
     }
     sourceSets.main.jni.srcDirs = []
+    sourceSets.main.assets.srcDirs = ['src/main/assets']
 
     task ndkBuild(type: Exec, description: 'Compile JNI source via NDK') {
         def ndkDir = android.ndkDirectory.getAbsolutePath()
