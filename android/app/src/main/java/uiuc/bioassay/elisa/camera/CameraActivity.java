@@ -63,6 +63,9 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -71,10 +74,13 @@ import com.google.android.gms.location.LocationServices;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -118,7 +124,7 @@ public class CameraActivity extends AppCompatActivity implements
                 mCamera.startPreview();
             }
             File pictureFile = getOutputImageFile(folder, picCount);
-            if (pictureFile == null){
+            if (pictureFile == null) {
                 Log.d(TAG, "Error creating media file, check storage permissions: ");
                 return;
             }
@@ -147,7 +153,7 @@ public class CameraActivity extends AppCompatActivity implements
                         intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                         startActivity(intent);
-                    } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE)){
+                    } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE)) {
                         exportLocationToFile();
                         Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
                         intent.setAction(ELISAApplication.ACTION_ONE_SAMPLE);
@@ -214,7 +220,61 @@ public class CameraActivity extends AppCompatActivity implements
      * Time when the location was updated represented as a String.
      */
     protected String mLastUpdateTime;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
+
+    // a helper method only present to test the code with a pre-existing image asset
+    private String assetToImage(String name) {
+        File cacheFile = getOutputImageFile(folder, 0);
+        try {
+            InputStream inputStream = getAssets().open(name);
+            try {
+                FileOutputStream outputStream = new FileOutputStream(cacheFile);
+                try {
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = inputStream.read(buf)) > 0) {
+                        outputStream.write(buf, 0, len);
+                    }
+                } finally {
+                    outputStream.close();
+                }
+            } finally {
+                inputStream.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Could not open image", e);
+        }
+
+        try {
+            copy(cacheFile, getOutputImageFile(folder, 1));
+            copy(cacheFile, getOutputImageFile(folder, 2));
+            copy(cacheFile, getOutputImageFile(folder, 3));
+            copy(cacheFile, getOutputImageFile(folder, 4));
+            copy(cacheFile, getOutputImageFile(folder, 5));
+            copy(cacheFile, getOutputImageFile(folder, 6));
+            copy(cacheFile, getOutputImageFile(folder, 7));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return cacheFile.getAbsolutePath();
+    }
+
+
+    public void copy(File src, File dst) throws IOException {
+        FileInputStream inStream = new FileInputStream(src);
+        FileOutputStream outStream = new FileOutputStream(dst);
+        FileChannel inChannel = inStream.getChannel();
+        FileChannel outChannel = outStream.getChannel();
+        inChannel.transferTo(0, inChannel.size(), outChannel);
+        inStream.close();
+        outStream.close();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -229,9 +289,34 @@ public class CameraActivity extends AppCompatActivity implements
         Log.d(TAG, folder);
         Log.d(TAG, action);
 
-        isVideoMode = action.equals(ELISAApplication.ACTION_VIDEO_SAMPLE);
+        // stop deleting
 
-        surfaceView = (SurfaceView)findViewById(R.id.surface_camera);
+        isVideoMode = action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE) && modeExtra.equals(ELISAApplication.MODE_FLUORESCENT);
+
+        //TODO(utsav) delete
+        if (!isVideoMode) {
+            assetToImage("image.jpg");
+            exportLocationToFile();
+            Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
+            intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
+            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
+            startActivity(intent);
+            finish();
+            if (true) {
+                return;
+            }
+        } else {
+            Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
+            intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
+            intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
+            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
+            intent.putExtra(ELISAApplication.VIDEO_EXTRA, getOutputVideoFile(folder).getAbsolutePath());
+            intent.putExtra(ELISAApplication.NUM_PEAKS, getIntent().getIntExtra(ELISAApplication.NUM_PEAKS, -1));
+            startActivity(intent);
+            finish();
+        }
+
+        surfaceView = (SurfaceView) findViewById(R.id.surface_camera);
         surfaceView.setEnabled(false);
         surfaceView.getHolder().addCallback(this);
         surfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -251,13 +336,14 @@ public class CameraActivity extends AppCompatActivity implements
                             stopRecording();
                             exportLocationToFile();
                             Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
+                            intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
                             intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                             intent.putExtra(ELISAApplication.VIDEO_EXTRA, getOutputVideoFile(folder).getAbsolutePath());
+                            intent.putExtra(ELISAApplication.NUM_PEAKS, getIntent().getIntExtra(ELISAApplication.NUM_PEAKS, -1));
                             startActivity(intent);
                             finish();
-                        }
-                        else if (isVideoMode) {
+                        } else if (isVideoMode) {
                             buttonCapture.setText(R.string.stop_capturing);
                             isCapturing = true;
                             startRecording();
@@ -284,6 +370,9 @@ public class CameraActivity extends AppCompatActivity implements
         // Kick off the process of building a GoogleApiClient and requesting the LocationServices
         // API.
         buildGoogleApiClient();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     protected void startRecording() {
@@ -322,7 +411,7 @@ public class CameraActivity extends AppCompatActivity implements
         releaseCamera();
     }
 
-    private void releaseMediaRecorder(){
+    private void releaseMediaRecorder() {
         if (mRecorder != null) {
             mRecorder.reset();   // clear recorder configuration
             mRecorder.release(); // release the recorder object
@@ -411,8 +500,12 @@ public class CameraActivity extends AppCompatActivity implements
     protected void startLocationUpdates() {
         // The final argument to {@code requestLocationUpdates()} is a LocationListener
         // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient, mLocationRequest, this);
+        } catch (SecurityException e) {
+            Log.e(TAG, "", e);
+        }
     }
 
 
@@ -492,14 +585,24 @@ public class CameraActivity extends AppCompatActivity implements
 
     @Override
     protected void onStart() {
-        super.onStart();
+        super.onStart();// ATTENTION: This was auto-generated to implement the App Indexing API.
+// See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
         mGoogleApiClient.connect();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
+        super.onStop();// ATTENTION: This was auto-generated to implement the App Indexing API.
+// See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
         mGoogleApiClient.disconnect();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.disconnect();
     }
 
     @Override
@@ -518,7 +621,7 @@ public class CameraActivity extends AppCompatActivity implements
         }
         if (action.equals(ELISAApplication.ACTION_BROADBAND)) {
             title.setText("Broadband Screen");
-        } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE) || action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE) || action.equals(ELISAApplication.ACTION_VIDEO_SAMPLE)) {
+        } else if (action.equals(ELISAApplication.ACTION_ONE_SAMPLE) || action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
             title.setText("Sample Screen");
         }
     }
@@ -563,8 +666,8 @@ public class CameraActivity extends AppCompatActivity implements
     public void onBackPressed() {
     }
 
-    private void releaseCamera(){
-        if (mCamera != null){
+    private void releaseCamera() {
+        if (mCamera != null) {
             mCamera.stopPreview();
             //mCamera.setPreviewCallback(null);
             if (mPreview != null) {
@@ -579,34 +682,45 @@ public class CameraActivity extends AppCompatActivity implements
         }
     }
 
-    /** A safe way to get an instance of the Camera object. */
-    private static Camera getCameraInstance(int cameraId){
+    /**
+     * A safe way to get an instance of the Camera object.
+     */
+    private static Camera getCameraInstance(int cameraId) {
         Log.d(TAG, "Attempting to get camera instance");
         Camera c = null;
         try {
             c = Camera.open(cameraId); // attempt to get a Camera instance
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, "", e);
             // Camera is not available (in use or does not exist)
         }
         return c; // returns null if elisa is unavailable
     }
 
-    /** Set elisa display orientation */
+    /**
+     * Set elisa display orientation
+     */
     public static void setCameraDisplayOrientation(Activity activity,
                                                    int cameraId, Camera camera) {
         Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
+                new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);
         int rotation = activity.getWindowManager().getDefaultDisplay()
                 .getRotation();
         int degrees = 0;
         switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
         }
 
         int result;
@@ -619,7 +733,9 @@ public class CameraActivity extends AppCompatActivity implements
         camera.setDisplayOrientation(result);
     }
 
-    /** Open elisa */
+    /**
+     * Open elisa
+     */
     private void openCamera(int cameraId) {
         if (mCamera != null) {
             return;
@@ -659,7 +775,7 @@ public class CameraActivity extends AppCompatActivity implements
             int width = 0;
             int height = 0;
             int maxArea = 0;
-            for (Camera.Size size : params.getSupportedPictureSizes ()) {
+            for (Camera.Size size : params.getSupportedPictureSizes()) {
                 int area = size.width * size.height;
                 if (area > maxArea) {
                     width = size.width;
@@ -706,7 +822,7 @@ public class CameraActivity extends AppCompatActivity implements
 
         // lock auto exposure
         if (params.isAutoExposureLockSupported()) {
-           params.setAutoExposureLock(true);
+            params.setAutoExposureLock(true);
         }
 
         // lock auto white balance
@@ -740,7 +856,25 @@ public class CameraActivity extends AppCompatActivity implements
 
     }
 
-    /** Shutter Start Series Sound */
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Camera Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    /**
+     * Shutter Start Series Sound
+     */
     private static class StartPictureSeriesSound {
         private final MediaActionSound media;
 
@@ -754,7 +888,9 @@ public class CameraActivity extends AppCompatActivity implements
         }
     }
 
-    /** Shutter Stop Series Sound */
+    /**
+     * Shutter Stop Series Sound
+     */
     private static class StopPictureSeriesSound {
         private final MediaActionSound media;
 
@@ -774,8 +910,8 @@ public class CameraActivity extends AppCompatActivity implements
         // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
                 Log.d(TAG, "failed to create directory");
                 return null;
             }
@@ -791,8 +927,10 @@ public class CameraActivity extends AppCompatActivity implements
         return new File(mediaStorageDir.getPath() + File.separator + "video.mp4");
     }
 
-    /** Create a File for saving an image */
-    private static File getOutputImageFile(String folder, int count){
+    /**
+     * Create a File for saving an image
+     */
+    private static File getOutputImageFile(String folder, int count) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
         File mediaStorageDir = createDirectory(folder);
@@ -802,7 +940,7 @@ public class CameraActivity extends AppCompatActivity implements
         // Create a media file name
         //String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         return new File(mediaStorageDir.getPath() + File.separator +
-                (count  + 1) + ".jpg");
+                (count + 1) + ".jpg");
     }
 
     private void exportLocationToFile() {
@@ -818,14 +956,10 @@ public class CameraActivity extends AppCompatActivity implements
                 out.write("Location: \n\tLatitude:" + mCurrentLocation.getLatitude() + "\n\tLongitude: " + mCurrentLocation.getLongitude() + "\n\tTime: " + mLastUpdateTime + "\n");
             }
             out.flush();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             Log.e(TAG, "Error: " + e.getMessage());
-        }
-        finally
-        {
-            if(out != null) {
+        } finally {
+            if (out != null) {
                 try {
                     out.close();
                 } catch (IOException e) {

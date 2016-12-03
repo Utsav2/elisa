@@ -150,7 +150,7 @@ namespace elisa {
             auto b = *++first;
             bool is_noise = (r < thr_noise) && (g < thr_noise) && (b < thr_noise);
             *mask_first = !is_noise;
-            fp_t denom = fluoroscent ? 1 : r * r + g * g + b * b;
+            fp_t denom = r * r + g * g + b * b;
             *d_first = is_noise ? 0 : (r / denom);
             *(++d_first) = is_noise ? 0 : (g / denom);
             *(++d_first) = is_noise ? 0 : (b / denom);
@@ -179,29 +179,28 @@ namespace elisa {
         }
     }
 
-    int process_fluoroscent(const std::string &path) noexcept {
-        for (size_t i = 0; i < 8; ++i) {
-            int ret = process_bb(path + std::to_string(i+1) + "/");
-            if (ret < 0) {
-                return ret;
-            }
+    template <typename ForwardIterator1, typename OutputIt>
+    void copy_and_remove_noise(ForwardIterator1 first1, ForwardIterator1 last1, OutputIt d_first) {
+        while (first1 != last1) {
+            auto r = *first1;
+            auto g = *++first1;
+            auto b = *++first1;
+            bool is_noise = (r < thr_noise) && (g < thr_noise) && (b < thr_noise);
+            *d_first = is_noise ? 0 : (r + g + b);
+            ++first1;
+            ++d_first;
         }
-        return 0;
     }
+
 
     int process_bb(const std::string &path) noexcept {
         matrix3<uint8_t> bb_im;
-        if (fluoroscent) {
-            println_e(path);
-            bb_im = imread<uint8_t, 3>(path + "image.jpg");
-        }
-        else {
-            bb_im = avg_folder<MAX_PICTURE>(
-                    path, AVG_FILE_NAME, Margin{left_off, right_off, 0, 0});
-            if (is_empty(bb_im)) {
-                println_e("Couldn't load sample image");
-                return -1;
-            }
+        bb_im = avg_folder<MAX_PICTURE>(
+                path, AVG_FILE_NAME, Margin{left_off, right_off, 0, 0});
+        if (is_empty(bb_im)) {
+            println_e("Couldn't load sample image");
+            LOGD("%d", __LINE__);
+            return -1;
         }
 
         auto bb_gray = rgb2gray(bb_im);
@@ -306,6 +305,7 @@ namespace elisa {
         std::fstream ofs_rgb_spec(path + RGB_SPEC, std::ios::out | std::ios::binary);
         if (!ofs_rgb_spec.good()) {
             println_e("Couldn't open broadband rgb spectrum file to write");
+            LOGD("%d", __LINE__);
             return -1;
         }
 
@@ -329,6 +329,7 @@ namespace elisa {
         std::fstream ofs_res(path + RES, std::ios::out | std::ios::binary);
         if (!ofs_res.good()) {
             println_e("Couldn't open broadband result file to write");
+            LOGD("%d", __LINE__);
             return -1;
         }
         ofs_res.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
@@ -341,6 +342,7 @@ namespace elisa {
         std::fstream ofs(path + BB_DATA, std::ios::out | std::ios::binary);
         if (!ofs.good()) {
             println_e("Couldn't open broadband file to write");
+            LOGD("%d", __LINE__);
             return -1;
         }
         ofs.write(reinterpret_cast<char *>(&top_off), sizeof(top_off));
@@ -360,7 +362,18 @@ namespace elisa {
         return 0;
     }
 
-    int process_sample(const std::string &path, int action) noexcept {
+    int process_fluoroscent(const std::string &path) noexcept {
+        for (size_t i = 0; i < 8; ++i) {
+            int ret = process_sample(path + std::to_string(i+1) + "/", 2, false);
+            if (ret < 0) {
+                return ret;
+            }
+        }
+        return 0;
+    }
+
+    int process_sample(const std::string &path, int action, bool average) noexcept {
+        LOGD("Path: %s", path.c_str());
         size_t pos = path.length() - 1;
         while (action > 0) {
             if (path[pos] == '/') {
@@ -371,24 +384,29 @@ namespace elisa {
             }
             --action;
         }
+
         auto root = path.substr(0, pos + 1);
+        LOGD("Root: %s", root.c_str());
         // Read broadband data file
         std::fstream ifs(root + BB_FOLDER + BB_DATA, std::ios::in | std::ios::binary);
         if (!ifs.good()) {
             println_e("Couldn't open broadband file to read");
             std::string s = root + BB_FOLDER + BB_DATA + " Couldn't open broadband file to read";
-            // LOGD("%s\n", s.c_str());
+            LOGD("%s\n", s.c_str());
             return -1;
         }
+
         size_t top_off;
         size_t bottom_off;
         size_t col_start;
         size_t col_end;
+
         ifs.read(reinterpret_cast<char *>(&top_off), sizeof(top_off));
         ifs.read(reinterpret_cast<char *>(&bottom_off), sizeof(bottom_off));
         ifs.read(reinterpret_cast<char *>(&col_start), sizeof(col_start));
         ifs.read(reinterpret_cast<char *>(&col_end), sizeof(col_end));
 
+        LOGD("%d", __LINE__);
         Circle circle;
         ifs.read(reinterpret_cast<char *>(&(circle.xc)), sizeof(circle.xc));
         ifs.read(reinterpret_cast<char *>(&(circle.yc)), sizeof(circle.yc));
@@ -399,19 +417,23 @@ namespace elisa {
         ifs.read(reinterpret_cast<char *>(&height), sizeof(height));
         ifs.read(reinterpret_cast<char *>(&width), sizeof(width));
         ifs.read(reinterpret_cast<char *>(&depth), sizeof(depth));
+        LOGD("%d height: %d, width: %d, depth: %d", __LINE__, height, width, depth);
 
         matrix3<fp_t> coeffs(height, width, depth);
         for (auto first = coeffs.begin(), last = coeffs.end(); first != last;
              ++first) {
             ifs.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
         }
+
         ifs.close();
+        LOGD("%d", __LINE__);
 
         // Read broadband result file
         std::fstream ifs_res(root + BB_FOLDER + RES, std::ios::in | std::ios::binary);
         if (!ifs_res.good()) {
             println_e("Couldn't open broadband result file to read");
-            // LOGD("Couldn't open broadband result file to read");
+            LOGD("Couldn't open broadband result file to read");
+            LOGD("%d", __LINE__);
             return -1;
         }
         ifs_res.read(reinterpret_cast<char *>(&col_end), sizeof(col_end));
@@ -419,14 +441,32 @@ namespace elisa {
         for (auto first = bg.begin(), last = bg.end(); first != last; ++first) {
             ifs_res.read(reinterpret_cast<char *>(&(*first)), sizeof(*first));
         }
-        ifs_res.close();
 
-        matrix3<uint8_t> sample_im = avg_folder<MAX_PICTURE>(
-                path, AVG_FILE_NAME, Margin{left_off, right_off, top_off, bottom_off});
+        ifs_res.close();
+        matrix3<uint8_t> sample_im;
+
+        if (average) {
+            sample_im = avg_folder<MAX_PICTURE>(
+                    path, AVG_FILE_NAME, Margin{left_off, right_off, top_off, bottom_off});
+        } else {
+            sample_im = imread<uint8_t, 3>(path + "image.jpg");
+        }
+
+        if (is_empty(sample_im)) {
+            LOGD("%s", ("no image: " + path).c_str());
+            return -1;
+        }
+
+        LOGD("sample %d, width: %d, height: %d, depth: %d", __LINE__, sample_im.size(1), sample_im.size(0), sample_im.size(2));
 
         matrix2<fp_t> f(height, width);
-        get_normalized_data(sample_im.begin(), sample_im.end(), coeffs.begin(),
-                            f.begin());
+
+        if (average) {
+            get_normalized_data(sample_im.begin(), sample_im.end(), coeffs.begin(),
+                                f.begin());
+        } else {
+            copy_and_remove_noise(sample_im.begin(), sample_im.end(), f.begin());
+        }
 
         std::vector<fp_t> s(col_end);
         std::vector<fp_t> red(col_end);
@@ -438,8 +478,15 @@ namespace elisa {
             green[i] = 0;
             blue[i] = 0;
         }
+
+        size_t min_width = width > sample_im.size(1) ? sample_im.size(1) : width;
+        size_t min_height = height > sample_im.size(0) ? sample_im.size(0): height;
+        LOGD("%d", __LINE__);
         size_t y_start = top_off;
-        size_t y_end = top_off + height - 1;
+        size_t y_end = top_off + min_height - 1;
+
+        LOGD("%d, min_height: %d min_width: %d", __LINE__, min_height, min_width);
+
         for (size_t i = col_start; i < col_end; ++i) {
             fp_t R = sqrt((i - circle.xc) * (i - circle.xc) +
                           (0 - circle.yc) * (0 - circle.yc));
@@ -447,10 +494,13 @@ namespace elisa {
             fp_t red_val = 0;
             fp_t green_val = 0;
             fp_t blue_val = 0;
+
             for (size_t y = y_start; y <= y_end; ++y) {
+
                 fp_t x = sqrt(R * R - (y - circle.yc) * (y - circle.yc)) + circle.xc -
                          left_off;
-                if (x >= 0 && x < width - 1) {
+                if (x >= 0 && x < min_width - 1) {
+
                     auto x1 = floor(x);
                     auto p = x - x1;
                     s_val += (1 - p) * f(y - top_off, x1) + p * f(y - top_off, x1 + 1);
@@ -460,13 +510,16 @@ namespace elisa {
                                  p * sample_im(y - top_off, x1 + 1, 1);
                     blue_val += (1 - p) * sample_im(y - top_off, x1, 2) +
                                 p * sample_im(y - top_off, x1 + 1, 2);
+
                 }
             }
+
             s[i] = s_val;
             red[i] = red_val;
             green[i] = green_val;
             blue[i] = blue_val;
         }
+
 
         // Write rgb spectrum to file
         std::fstream ofs_rgb_spec(path + RGB_SPEC, std::ios::out | std::ios::binary);
@@ -475,11 +528,16 @@ namespace elisa {
             return -1;
         }
 
+
+        LOGD("%d", __LINE__);
+
         ofs_rgb_spec.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
         auto first_r = red.begin();
         auto last_r = red.end();
         auto first_g = green.begin();
         auto first_b = blue.begin();
+
+        LOGD("%d", __LINE__);
 
         while (first_r != last_r) {
             ofs_rgb_spec.write(reinterpret_cast<char *>(&(*first_r)), sizeof(*first_r));
@@ -489,6 +547,7 @@ namespace elisa {
             ++first_g;
             ++first_b;
         }
+
         ofs_rgb_spec.close();
 
         for (size_t i = 0; i < bg.size(); ++i) {
@@ -501,6 +560,8 @@ namespace elisa {
             }
         }
 
+        LOGD("%d", __LINE__);
+
         println_i(std::fixed,
                   std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
         // LOGD("%f", std::accumulate(s.begin(), s.end(), static_cast<fp_t>(0)));
@@ -508,16 +569,26 @@ namespace elisa {
                   std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
         // LOGD("%f", std::accumulate(bg.begin(), bg.end(), static_cast<fp_t>(0)));
 
+        LOGD("%d", __LINE__);
         // Write result to file
+        LOGD("Writing to file %s", (path + RES).c_str());
         std::fstream ofs_res(path + RES, std::ios::out | std::ios::binary);
         if (!ofs_res.good()) {
+
+            LOGD("%d", __LINE__);
             println_e("Couldn't open broadband result file to write");
             return -1;
         }
+
+        LOGD("%d", __LINE__);
         ofs_res.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
+
+        LOGD("%d", __LINE__);
         for (auto first = s.begin(), last = s.end(); first != last; ++first) {
             ofs_res.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
         }
+
+        LOGD("%d", __LINE__);
         ofs_res.close();
         return 0;
     }

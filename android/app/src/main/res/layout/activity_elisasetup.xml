@@ -6,6 +6,7 @@
     tools:context="uiuc.bioassay.tlc.ELISASetupActivity">
 
     <TextView
+        android:id="@+id/setup_elisa"
         android:layout_width="fill_parent"
         android:layout_height="25dp"
         android:layout_alignParentTop="true"
@@ -31,6 +32,7 @@
             android:src="@drawable/uiuc_logo" />
 
         <TextView
+            android:id="@+id/elisa_setup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

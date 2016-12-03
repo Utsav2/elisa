@@ -66,12 +66,45 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
         progressDialog.show();
     }
 
+    // a helper method only present to test the code with a pre-existing image asset
+    private void aa(int n) {
+        File cacheFile = new File(folder, + (n+1)+"");
+        cacheFile.mkdirs();
+        cacheFile = new File(cacheFile, "image.jpg");
+        try {
+            InputStream inputStream = mContext.getAssets().open("img" + n + ".jpg");
+            try {
+                FileOutputStream outputStream = new FileOutputStream(cacheFile);
+                try {
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = inputStream.read(buf)) > 0) {
+                        outputStream.write(buf, 0, len);
+                    }
+                } finally {
+                    outputStream.close();
+                }
+            } finally {
+                inputStream.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Could not open image", e);
+        }
+    }
+
     @Override
     protected Integer doInBackground(String... params) {
         folder = params[0];
         String videoFile = params[1];
+        //todo(utsav) use this value instead of 8
+        int numPeaks = Integer.parseInt(params[2]);
         // TODO(utsav) replace this with actual camera footage
-        startProcessingVideo(assetToVideoFile("MOV_0051.MP4"));
+        // startProcessingVideo(assetToVideoFile("MOV_0051.MP4"));
+        // TODO(utsav) delete
+        for (int i = 0; i < 8; i++) {
+            aa(i);
+        }
+
         int ret = processF(folder + File.separator);
         Log.d(TAG, "here " + ret);
         return ret;
@@ -97,7 +130,7 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
                 inputStream.close();
             }
         } catch (IOException e) {
-            throw new RuntimeException("Could not open robot png", e);
+            throw new RuntimeException("Could not open video", e);
         }
         System.gc();
         return cacheFile.getAbsolutePath();
@@ -260,29 +293,30 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
     protected void onPostExecute(Integer result) {
         progressDialog.dismiss();
         Activity activity = (Activity) mContext;
-        BBProcActivity bbProcActivity = (BBProcActivity) activity;
-        if (bbProcActivity == null) {
-            return;
-        }
-        if (result == -1) {
-            TextView textView = (TextView) bbProcActivity.findViewById(R.id.text_result);
-            textView.setText("Error, unable to process data!");
-            bbProcActivity.setCurrResult(result);
+        SampleProcActivity sampleProcActivity = (SampleProcActivity) activity;
+        if (sampleProcActivity == null) {
             return;
         }
 
-        final ImageView imageView = (ImageView) bbProcActivity.findViewById(R.id.imageView);
+        if (result == -1) {
+            TextView textView = (TextView) sampleProcActivity.findViewById(R.id.text_result);
+            textView.setText("Error, unable to process data!");
+            sampleProcActivity.setCurrResult(result);
+            return;
+        }
+
+        final ImageView imageView = (ImageView) sampleProcActivity.findViewById(R.id.imageView);
         imageView.setImageBitmap(decodeIMG(folder + "/1/image.jpg"));
 
-        Button previous = (Button) bbProcActivity.findViewById(R.id.previous);
+        Button previous = (Button) sampleProcActivity.findViewById(R.id.previous);
         previous.setVisibility(View.VISIBLE);
 
-        Button next = (Button) bbProcActivity.findViewById(R.id.next);
+        Button next = (Button) sampleProcActivity.findViewById(R.id.next);
         next.setVisibility(View.VISIBLE);
 
-        Button button = (Button) bbProcActivity.findViewById(R.id.image_button);
+        Button button = (Button) sampleProcActivity.findViewById(R.id.image_button);
         button.setEnabled(false);
-        bbProcActivity.setResult(result);
+        sampleProcActivity.setResult(result);
     }
 
     private static Bitmap decodeIMG(String img) {

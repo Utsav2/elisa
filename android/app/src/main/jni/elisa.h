@@ -9,7 +9,7 @@ namespace elisa {
     constexpr uint8_t thr_noise = 20;
 
     constexpr const char *BB_FOLDER = "bb/";
-    constexpr const char *AVG_FILE_NAME = "avg.jpg";
+    constexpr const char *AVG_FILE_NAME = "image.jpg";
     constexpr const char *BB_DATA = "bb.bin";
     constexpr const char *RES = "res.bin";
     constexpr const char *RGB_SPEC = "rgb.bin";
@@ -17,14 +17,14 @@ namespace elisa {
 
     int process_fluoroscent(const std::string &path) noexcept;
 
-    int process_bb(const std::string &path, bool fluoroscent = false) noexcept;
-    inline int process_bb(const char *path, bool fluoroscent = false) noexcept {
-        return process_bb(std::string(path), fluoroscent);
+    int process_bb(const std::string &path) noexcept;
+    inline int process_bb(const char *path) noexcept {
+        return process_bb(std::string(path));
     }
 
-    int process_sample(const std::string &path, int action) noexcept;
-    inline int process_sample(const char *path, int action) noexcept {
-        return process_sample(std::string(path), action);
+    int process_sample(const std::string &path, int action, bool average = true) noexcept;
+    inline int process_sample(const char *path, int action, bool average = true) noexcept {
+        return process_sample(std::string(path), action, average);
     }
 
     inline std::vector<fp_t> read_rgb_spec(const char* path) {

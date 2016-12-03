@@ -17,8 +17,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -30,6 +28,7 @@ import java.io.File;
 import uiuc.bioassay.elisa.camera.CameraActivity;
 
 import static uiuc.bioassay.elisa.ELISAApplication.ELISA_PROC_MODE;
+import static uiuc.bioassay.elisa.ELISAApplication.MODE_FLUORESCENT;
 import static uiuc.bioassay.elisa.ELISAApplication.round;
 
 public class ELISAResultActivity extends AppCompatActivity {
@@ -38,9 +37,10 @@ public class ELISAResultActivity extends AppCompatActivity {
     private static final int COLUMN_WIDTH = 155;
     private String folder;
     private int numStds;
+    private String mode;
     private int maxNumReplicates;
     private double[] absorptions;
-    private int[] numReplitcates;
+    private int[] numReplicates;
     private EditText[] editTexts;
     private boolean dataRetrieving = false;
     private int procMode;
@@ -52,16 +52,20 @@ public class ELISAResultActivity extends AppCompatActivity {
         Intent intent = getIntent();
         numStds = intent.getIntExtra(ELISAApplication.NUM_STDS, 0);
         maxNumReplicates = intent.getIntExtra(ELISAApplication.MAX_NUM_REPLICATES, 0);
+        mode = intent.getStringExtra(ELISAApplication.MODE_EXTRA);
         folder = intent.getStringExtra(ELISAApplication.FOLDER_EXTRA);
         procMode = intent.getIntExtra(ELISA_PROC_MODE, 0);
+        if (mode.equals(MODE_FLUORESCENT)) {
+            drawFluoroscentTable(maxNumReplicates);
+        }
         drawTable(numStds, maxNumReplicates);
         absorptions = new double[numStds];
         for (int i = 0; i < absorptions.length; ++i) {
             absorptions[i] = 0;
         }
-        numReplitcates = new int[numStds];
-        for (int i = 0; i < numReplitcates.length; ++i) {
-            numReplitcates[i] = 0;
+        numReplicates = new int[numStds];
+        for (int i = 0; i < numReplicates.length; ++i) {
+            numReplicates[i] = 0;
         }
         Button resultNext = (Button) findViewById(R.id.elisa_result_next);
         resultNext.setOnClickListener(
@@ -75,11 +79,11 @@ public class ELISAResultActivity extends AppCompatActivity {
                                     case DialogInterface.BUTTON_POSITIVE:
                                         double[] finalResult = new double[absorptions.length];
                                         for (int i = 0; i < finalResult.length; ++i) {
-                                            Log.d(TAG, "" + numReplitcates[i]);
-                                            if (numReplitcates[i] == 0) {
+                                            Log.d(TAG, "" + numReplicates[i]);
+                                            if (numReplicates[i] == 0) {
                                                 finalResult[i] = 0;
                                             } else {
-                                                finalResult[i] = absorptions[i] / numReplitcates[i];
+                                                finalResult[i] = absorptions[i] / numReplicates[i];
                                             }
                                         }
                                         double[] stds = new double[absorptions.length];
@@ -160,7 +164,84 @@ public class ELISAResultActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    void drawTable(int nRows, final int nCols) {
+    void drawFluoroscentTable(final int numSamples) {
+        findViewById(R.id.f_table_text).setVisibility(View.VISIBLE);
+        ScrollView fScrollView = (ScrollView)findViewById(R.id.scroll_view_f);
+        fScrollView.setVisibility(View.VISIBLE);
+        TableLayout fTableLayout = (TableLayout)findViewById(R.id.fluoroscent_table);
+        TableLayout.LayoutParams lp = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT);
+        TableRow headerRow = new TableRow(this);
+
+        TextView placeHolder = new TextView(this);
+        placeHolder.setMinimumWidth(COLUMN_WIDTH);
+        placeHolder.setVisibility(View.INVISIBLE);
+        headerRow.addView(placeHolder);
+
+        for (int i = 1; i < numSamples + 1; ++i) {
+            TextView textView = new TextView(this);
+            textView.setMinimumWidth(COLUMN_WIDTH);
+            textView.setGravity(Gravity.CENTER);
+            textView.setText("" + i);
+            headerRow.addView(textView);
+        }
+
+        fTableLayout.addView(headerRow);
+
+        TableRow tableRow = new TableRow(this);
+        TextView anotherPlaceholder = new TextView(this);
+        anotherPlaceholder.setMinimumWidth(COLUMN_WIDTH);
+        anotherPlaceholder.setVisibility(View.INVISIBLE);
+        tableRow.addView(anotherPlaceholder);
+
+        for (int i = 1; i < numSamples + 1; ++i) {
+            final Button button = new Button(this);
+            button.setMinimumWidth(COLUMN_WIDTH);
+            button.setGravity(Gravity.CENTER);
+            final int finalI = i;
+            button.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            for (EditText editText : editTexts)
+                            if (editText.getText().toString().equals("")) {
+                                Toast.makeText(ELISAResultActivity.this, "Please fill in the std concentration", Toast.LENGTH_LONG).show();
+                                editText.requestFocus();
+                                return;
+                            }
+                            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case DialogInterface.BUTTON_POSITIVE:
+                                            dataRetrieving = true;
+                                            Intent intent = new Intent(ELISAResultActivity.this, CameraActivity.class);
+                                            intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
+                                            intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
+                                            intent.putExtra(ELISAApplication.NUM_PEAKS, numSamples);
+                                            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder + File.separator);
+                                            intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
+                                            startActivity(intent);
+                                            break;
+
+                                        case DialogInterface.BUTTON_NEGATIVE:
+                                            //No button clicked
+                                            break;
+                                    }
+                                }
+                            };
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ELISAResultActivity.this);
+                            builder.setTitle("Are you sure that you want to take new sample?")
+                                    .setPositiveButton("Yes", dialogClickListener)
+                                    .setNegativeButton("No", dialogClickListener).show();
+                        }
+                    }
+            );
+            tableRow.addView(button);
+        }
+        fTableLayout.addView(tableRow);
+    }
+
+    void drawTable(final int nRows, final int nCols) {
         tableLayout = (TableLayout) findViewById(R.id.result_table);
         TableLayout.LayoutParams lp = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT);
 
@@ -207,53 +288,64 @@ public class ELISAResultActivity extends AppCompatActivity {
             );
             editTexts[i] = editText;
             tableRow.addView(editText);
-            for (int j = 0; j < nCols; ++j) {
-                final Button button = new Button(this);
-                button.setMinimumWidth(COLUMN_WIDTH);
-                button.setGravity(Gravity.CENTER);
-                final int finalI = i;
-                final int finalJ = j;
-                button.setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (editText.getText().toString().equals("")) {
-                                    Toast.makeText(ELISAResultActivity.this, "Please fill in the std concentration", Toast.LENGTH_LONG).show();
-                                    editText.requestFocus();
-                                    return;
-                                }
-                                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        switch (which) {
-                                            case DialogInterface.BUTTON_POSITIVE:
-                                                dataRetrieving = true;
-                                                Intent intent = new Intent(ELISAResultActivity.this, CameraActivity.class);
-                                                intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
-                                                intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
-                                                intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder + File.separator + editText.getText().toString() + File.separator + (finalJ + 1));
-                                                Log.d(TAG, "int Extra: " + (finalI * nCols + finalJ));
-                                                intent.putExtra(ELISAApplication.INT_EXTRA, finalI * nCols + finalJ);
-                                                intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
-                                                startActivity(intent);
-                                                break;
-
-                                            case DialogInterface.BUTTON_NEGATIVE:
-                                                //No button clicked
-                                                break;
-                                        }
+            if (!mode.equals(ELISAApplication.MODE_FLUORESCENT)) {
+                for (int j = 0; j < nCols; ++j) {
+                    final Button button = new Button(this);
+                    button.setMinimumWidth(COLUMN_WIDTH);
+                    button.setGravity(Gravity.CENTER);
+                    final int finalI = i;
+                    final int finalJ = j;
+                    button.setOnClickListener(
+                            new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (editText.getText().toString().equals("")) {
+                                        Toast.makeText(ELISAResultActivity.this, "Please fill in the std concentration", Toast.LENGTH_LONG).show();
+                                        editText.requestFocus();
+                                        return;
                                     }
-                                };
-                                AlertDialog.Builder builder = new AlertDialog.Builder(ELISAResultActivity.this);
-                                builder.setTitle("Are you sure that you want to take new sample?").setMessage("Sample Information: " + "\n  - Std Value: " + getText(editText) +
-                                        "\n  - Current Value : " + getText(button))
-                                        .setPositiveButton("Yes", dialogClickListener)
-                                        .setNegativeButton("No", dialogClickListener).show();
+                                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch (which) {
+                                                case DialogInterface.BUTTON_POSITIVE:
+                                                    dataRetrieving = true;
+                                                    Intent intent = new Intent(ELISAResultActivity.this, CameraActivity.class);
+                                                    intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
+                                                    intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
+                                                    intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder + File.separator + editText.getText().toString() + File.separator + (finalJ + 1));
+                                                    Log.d(TAG, "int Extra: " + (finalI * nCols + finalJ));
+                                                    intent.putExtra(ELISAApplication.INT_EXTRA, finalI * nCols + finalJ);
+                                                    intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
+                                                    startActivity(intent);
+                                                    break;
+
+                                                case DialogInterface.BUTTON_NEGATIVE:
+                                                    //No button clicked
+                                                    break;
+                                            }
+                                        }
+                                    };
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(ELISAResultActivity.this);
+                                    builder.setTitle("Are you sure that you want to take new sample?").setMessage("Sample Information: " + "\n  - Std Value: " + getText(editText) +
+                                            "\n  - Current Value : " + getText(button))
+                                            .setPositiveButton("Yes", dialogClickListener)
+                                            .setNegativeButton("No", dialogClickListener).show();
+                                }
                             }
-                        }
-                );
-                tableRow.addView(button);
+                    );
+                    tableRow.addView(button);
+                }
+            } else {
+                for (int j = 0; j < nCols; ++j) {
+                    TextView dataPoint = new TextView(this);
+                    dataPoint.setMinimumWidth(COLUMN_WIDTH);
+                    dataPoint.setText("0.00");
+                    dataPoint.setGravity(Gravity.CENTER);
+                    tableRow.addView(dataPoint);
+                }
             }
+
             TextView avg = new TextView(this);
             avg.setMinimumWidth(COLUMN_WIDTH);
             avg.setText("0.00");
@@ -286,13 +378,13 @@ public class ELISAResultActivity extends AppCompatActivity {
             Log.d(TAG, ELISAApplication.resultSampleAbs + "");
             if (oldButtonText.equals("")) {
                 absorptions[i] += ELISAApplication.resultSampleAbs;
-                numReplitcates[i] += 1;
+                numReplicates[i] += 1;
             } else {
                 double oldResult = Double.parseDouble(oldButtonText);
                 absorptions[i] = absorptions[i] - oldResult + ELISAApplication.resultSampleAbs;
             }
             button.setText("" + round(ELISAApplication.resultSampleAbs, 2));
-            textView.setText("" + round(absorptions[i] / numReplitcates[i], 2));
+            textView.setText("" + round(absorptions[i] / numReplicates[i], 2));
             dataRetrieving = false;
         }
     }

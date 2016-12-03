@@ -44,6 +44,7 @@ matrix<uint8_t, N> avg_folder(const char *path_name, const char *avg_file_name,
 
   if (margin.top >= height || margin.bottom >= height || margin.left >= width ||
       margin.right >= width) {
+    LOGD("%d", __LINE__);
     return empty_mat;
   }
   size_t row_start = margin.top;

@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 
 public class ELISASetupActivity extends ActionBarActivity {
@@ -18,6 +19,13 @@ public class ELISASetupActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_elisasetup);
+        if (ELISAApplication.MODE_FLUORESCENT.equals(getIntent().getStringExtra(ELISAApplication.MODE_EXTRA))) {
+            TextView tv = (TextView)findViewById(R.id.setup_elisa);
+            tv.setText("Fluoroscent setup");
+            TextView another = (TextView)findViewById(R.id.elisa_setup);
+            another.setText("Fluoroscent setup");
+        }
+
         final Spinner numStdsSpinner = (Spinner) findViewById(R.id.num_stds);
         final Spinner numReplicatesSpinner = (Spinner) findViewById(R.id.num_replicates);
         Button nextSetup = (Button) findViewById(R.id.next_setup);

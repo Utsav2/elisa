@@ -13,10 +13,22 @@
         android:layout_centerVertical="true"
         android:scaleType="fitCenter" />
 
+    <TextView
+        android:id="@+id/text_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <TextView
             android:layout_width="match_parent"
@@ -58,31 +70,47 @@
                 android:text="ABS Spec"
                 android:id="@+id/abs_button" />
         </LinearLayout>
+
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chart"
             android:visibility="invisible"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="50dp"
+            android:layout_height="426dp"
+            android:layout_marginBottom="0dp"
             />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <Button
+                android:id="@+id/previous"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                android:layout_alignBottom="@+id/imageView"
+                android:layout_centerHorizontal="true"
+                android:text="Previous" />
+            <Button
+                android:id="@+id/done"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/imageView"
+                android:layout_centerHorizontal="true"
+                android:text="Done" />
+            <Button
+                android:id="@+id/next"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                android:layout_alignBottom="@+id/imageView"
+                android:layout_centerHorizontal="true"
+                android:text="Next" />
+
+        </LinearLayout>
+
     </LinearLayout>
-
-    <Button
-        android:id="@+id/done"
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/imageView"
-        android:layout_centerHorizontal="true"
-        android:text="Done" />
-
-    <TextView
-        android:id="@+id/text_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

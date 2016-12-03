@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="uiuc.bioassay.tlc.ELISAResultActivity"
     android:clickable="true"
     android:focusableInTouchMode="true">
 
@@ -32,6 +31,7 @@
             android:src="@drawable/uiuc_logo" />
 
         <TextView
+            android:id="@+id/result_table_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -42,6 +42,33 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="400dp">
+            <TextView
+                android:id="@+id/f_table_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Collect data for a replicate"
+                android:visibility="gone"
+                android:textSize="20sp" />
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:id="@+id/scroll_view_f"
+                android:visibility="gone"
+                >
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal">
+                    <TableLayout
+                        android:id="@+id/fluoroscent_table"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        >
+                    </TableLayout>
+                </HorizontalScrollView>
+            </ScrollView>
+
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
