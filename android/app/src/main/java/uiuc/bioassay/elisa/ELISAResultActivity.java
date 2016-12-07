@@ -278,7 +278,7 @@ public class ELISAResultActivity extends AppCompatActivity {
                                             Intent intent = new Intent(ELISAResultActivity.this, CameraActivity.class);
                                             intent.putExtra(ELISAApplication.MODE_EXTRA, getIntent().getStringExtra(ELISAApplication.MODE_EXTRA));
                                             intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
-                                            intent.putExtra(ELISAApplication.NUM_PEAKS, numSamples);
+                                            intent.putExtra(ELISAApplication.NUM_PEAKS, numStds);
                                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder + File.separator);
                                             intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
                                             intent.putExtra(ELISAApplication.INT_EXTRA, finalI);

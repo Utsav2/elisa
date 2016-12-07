@@ -163,6 +163,7 @@ public class CameraActivity extends AppCompatActivity implements
                         exportLocationToFile();
                         Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
                         intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
+                        intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
                         intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                         Log.d(TAG, "intExtra: " + intExtra);
                         intent.putExtra(ELISAApplication.INT_EXTRA, intExtra);
@@ -306,6 +307,7 @@ public class CameraActivity extends AppCompatActivity implements
     protected void startRecording() {
         releaseCamera();
         mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+        setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_BACK, mCamera);
         mCamera.unlock();
 
         mRecorder = new MediaRecorder();  // Works well
@@ -734,6 +736,7 @@ public class CameraActivity extends AppCompatActivity implements
 
 
         if (isVideoMode) {
+            params.setRotation(0);
             params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_CLOUDY_DAYLIGHT);
             // Set flash
             params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
@@ -743,7 +746,7 @@ public class CameraActivity extends AppCompatActivity implements
             // Set white balance
             params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_INCANDESCENT);
             // Set flash
-            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             // Set iso
             params.set("iso", String.valueOf("100"));
         }
