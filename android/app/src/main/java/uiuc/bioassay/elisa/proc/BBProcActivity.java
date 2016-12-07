@@ -239,7 +239,6 @@ public class BBProcActivity extends AppCompatActivity {
             blue[i-startIdx] = rgb_spec[3*i + 2];
         }
 
-
         ArrayList<Entry> yRedVals = new ArrayList<>();
         ArrayList<Entry> yGreenVals = new ArrayList<>();
         ArrayList<Entry> yBlueVals = new ArrayList<>();
@@ -250,7 +249,6 @@ public class BBProcActivity extends AppCompatActivity {
             yGreenVals.add(new Entry((float)green[i-startIdx], idx));
             yBlueVals.add(new Entry((float)blue[i-startIdx], idx));
         }
-
 
         LineDataSet setRed = new LineDataSet(yRedVals, "Red Spectrum");
         setRed.setDrawCircles(false);

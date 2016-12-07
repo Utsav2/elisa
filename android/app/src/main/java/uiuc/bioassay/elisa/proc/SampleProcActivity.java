@@ -30,7 +30,10 @@ import java.util.ArrayList;
 import uiuc.bioassay.elisa.ELISAApplication;
 import uiuc.bioassay.elisa.R;
 
+import static org.bytedeco.javacpp.opencv_core.max;
 import static org.bytedeco.javacpp.opencv_core.mean;
+import static uiuc.bioassay.elisa.ELISAApplication.FLUOROSCENT_FRAME_AREA_THRESHOLD;
+import static uiuc.bioassay.elisa.ELISAApplication.FLUOROSCENT_LASER_AND_DATA_AREA_THRESHOLD;
 import static uiuc.bioassay.elisa.ELISAApplication.MODE_FLUORESCENT;
 import static uiuc.bioassay.elisa.ELISAApplication.VIDEO_EXTRA;
 import static uiuc.bioassay.elisa.ELISAApplication.readBBResNormalized;
@@ -38,6 +41,19 @@ import static uiuc.bioassay.elisa.ELISAApplication.readRGBSpec;
 import static uiuc.bioassay.elisa.ELISAApplication.readSampleResNormalized;
 
 public class SampleProcActivity extends AppCompatActivity {
+
+    class NmScaleInfo {
+        int startIdx;
+        int endIdx;
+        double [] nm;
+
+        NmScaleInfo(int startIdx, int endIdx, double [] nm) {
+            this.startIdx = startIdx;
+            this.endIdx = endIdx;
+            this.nm = nm;
+        }
+    }
+
     private static final String TAG = "SAMPLE";
     private int currResult;
     private File folder;
@@ -46,15 +62,17 @@ public class SampleProcActivity extends AppCompatActivity {
     private Button absButton;
     private ImageView view;
     private String mode;
-    Button rgbButton;
+    private Button rgbButton;
     private Bitmap [] bitmaps;
     private double[][] rgb_spec;
     private double[][] bb;
     private double[][] sample;
     private double[][] absData;
+    private double[][] preprocessedFluoroscentData;
     private double[][] normalizedFluoroscentData;
     private double[] laserAreas;
     private double laserAreasAverage;
+    private double laserAreasMax = -1;
     private double[] dataAreas;
     private Button currButton;
     private LineChart chart;
@@ -89,7 +107,6 @@ public class SampleProcActivity extends AppCompatActivity {
                     assert (idx >= 1 && (idx < absData[current].length - 1));
                     double a = (nm[idx - 1] - 450);
                     double b = (450 - nm[idx]);
-                    Log.d(TAG, "" + a + ", " + b);
                     resAbsData = (b / (a + b)) * absData[current][idx - 1] + (a / (a + b)) * absData[current][idx];
                 }
                 ELISAApplication.currentSampleIdx = intent.getIntExtra(ELISAApplication.INT_EXTRA, -1);
@@ -97,6 +114,13 @@ public class SampleProcActivity extends AppCompatActivity {
             } else if (mode.equals(ELISAApplication.MODE_FLUORESCENT)) {
                 reassignCurrent();
                 setRgbForCurrent();
+                setNormalizedFluoroscentData();
+                ELISAApplication.currentSampleIdx = intent.getIntExtra(ELISAApplication.INT_EXTRA, -2);
+                ELISAApplication.currentNormalizedAreas = new double[numPeaks];
+                for (int i = 0; i < numPeaks; i++) {
+                    ELISAApplication.currentNormalizedAreas[i] = Math.sqrt(dataAreas[i]) /
+                            Math.sqrt(Math.sqrt(laserAreas[i] * laserAreasAverage));
+                }
             }
         }
         finish();
@@ -154,7 +178,7 @@ public class SampleProcActivity extends AppCompatActivity {
             // rgb_spec = readRGBSpec("/storage/emulated/0/Android/data/uiuc.bioassay.elisa/test-elisa/sample" + File.separator + ELISAApplication.RGB_SPEC);
             // TODO: Enable the below in production
             if (mode.equals(ELISAApplication.MODE_FLUORESCENT) && getIntent().getAction().equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE)) {
-                rgb_spec[i] = readRGBSpec(folder.getAbsolutePath() + File.separator + (current+1) + File.separator + ELISAApplication.RGB_SPEC);
+                rgb_spec[i] = readRGBSpec(folder.getAbsolutePath() + File.separator + (i+1) + File.separator + ELISAApplication.RGB_SPEC);
             } else {
                 rgb_spec[i] = readRGBSpec(folder.getAbsolutePath() + File.separator + ELISAApplication.RGB_SPEC);
             }
@@ -166,7 +190,7 @@ public class SampleProcActivity extends AppCompatActivity {
     }
 
     private void setRgbForAll() {
-        for (int i = 0; i < getIntent().getIntExtra(ELISAApplication.NUM_PEAKS, -1); i++) {
+        for (int i = 0; i < numPeaks; i++) {
             setRgbForIndex(i);
         }
     }
@@ -277,6 +301,7 @@ public class SampleProcActivity extends AppCompatActivity {
         }
 
         laserAreas = new double[numPeaks];
+        preprocessedFluoroscentData = new double[numPeaks][];
         normalizedFluoroscentData = new double[numPeaks][];
 
         Button done = (Button) findViewById(R.id.done);
@@ -427,73 +452,128 @@ public class SampleProcActivity extends AppCompatActivity {
         for (int i = 0; i < numPeaks; i++) {
             setArea(i);
         }
-        laserAreasAverage = mean(new opencv_core.Mat(laserAreas)).magnitude();
+        opencv_core.Mat m = new opencv_core.Mat(laserAreas);
+        laserAreasAverage = mean(m).magnitude();
+        m._deallocate();
+    }
+
+    public static double cumtrapz(double [] vec, int min, int max) {
+
+        double sum = 0;
+        double cumulative = 0;
+
+        for(int i = min; i < max; i++){
+            sum += (vec[i]+vec[i+1])/2.0;
+            cumulative += sum;
+        }
+        return cumulative;
     }
 
     private void setArea(int index) {
+
+        // it's already been set
         if (Math.abs(dataAreas[index]) > 2 * Double.MIN_VALUE) {
             return;
         }
-    }
 
-    private void setNormalizedFluoroscentData(int index) {
+        double [] input = preprocessedFluoroscentData[index];
 
-        if (normalizedFluoroscentData[index] == null) {
+        double max = -1;
+        int maxIndex = -1;
 
-            setRgbForIndex(index);
-            setAreasAll();
-
-            int length = rgb_spec[index].length / 3;
-
-            double nmScale = (ELISAApplication.RED_LASER_NM - ELISAApplication.GREEN_LASER_NM) /
-                    (ELISAApplication.RED_LASER_PEAK - ELISAApplication.GREEN_LASER_PEAK);
-
-            double nmOff = ELISAApplication.GREEN_LASER_NM - nmScale * ELISAApplication.GREEN_LASER_PEAK;
-
-            double[] nm = new double[length];
-            for (int i = 0; i < length; ++i) {
-                nm[i] = nmScale * i + nmOff;
+        // first find the max
+        for (int i = 0; i < input.length; i ++) {
+            if (input[i] > max) {
+                max = input[i];
+                maxIndex = i;
             }
-
-            int startIdx = 0;
-            while (nm[startIdx] > 700) {
-                ++startIdx;
-            }
-            int endIdx = startIdx;
-            while (endIdx < (length - 1) && nm[endIdx] >= 380) {
-                ++endIdx;
-            }
-
-            double[] colorVals = new double[endIdx - startIdx + 1];
-            for (int i = startIdx; i <= endIdx; ++i) {
-                colorVals[i - startIdx] = (rgb_spec[current][3 * i] + rgb_spec[current][3 * i + 1] + +rgb_spec[current][3 * i + 2]);
-                colorVals[i - startIdx] /= Math.sqrt(Math.sqrt(laserAreas[current] * laserAreasAverage));
-            }
-
-            normalizedFluoroscentData[current] = colorVals;
         }
-    }
 
-    private void setNormalizedFluoroscentData() {
-        reassignCurrent();
-        setNormalizedFluoroscentData(current);
-    }
+        double thresholdValue = max * FLUOROSCENT_LASER_AND_DATA_AREA_THRESHOLD;
 
-    private void setNormalizedFluoroscentDataAll() {
-        for (int i = 0; i < numPeaks; i++) {
-            setNormalizedFluoroscentData(i);
+        int stopLeftIndex = maxIndex - 1;
+        int stopRightIndex = maxIndex + 1;
+
+        while (stopLeftIndex >= 0 && input[stopLeftIndex] > thresholdValue) {
+            stopLeftIndex--;
         }
+
+        while(stopRightIndex < input.length && input[stopRightIndex] > thresholdValue) {
+            stopRightIndex++;
+        }
+
+        double firstIntegral = cumtrapz(input, stopLeftIndex, stopRightIndex);
+
+        // now find the second peak not between this data
+        double max2 = -1;
+        int max2Index = -1;
+
+        for (int i = 0; i < stopLeftIndex; i++) {
+            if (max2 < input[i]) {
+                max2 = input[i];
+                max2Index = i;
+            }
+        }
+
+        for (int i = stopRightIndex; i < input.length; i++) {
+            if (max2 < input[i]) {
+                max2 = input[i];
+                max2Index = i;
+            }
+        }
+
+        int stopLeftIndex2 = max2Index - 1;
+        int stopRightIndex2 = max2Index + 1;
+
+        boolean isLeft = max2Index < maxIndex;
+
+        if (isLeft) {
+            while (stopLeftIndex2 >= 0 && input[stopLeftIndex2] > thresholdValue) {
+                stopLeftIndex2--;
+            }
+
+            while (stopRightIndex2 < stopLeftIndex && input[stopRightIndex2] > thresholdValue) {
+                stopRightIndex2++;
+            }
+        } else {
+            while (stopLeftIndex2 >= stopRightIndex  && input[stopLeftIndex2] > thresholdValue) {
+                stopLeftIndex2--;
+            }
+
+            while (stopRightIndex2 < input.length && input[stopRightIndex2] > thresholdValue) {
+                stopRightIndex2++;
+            }
+        }
+
+        // now calculate integration of the second one
+        double secondIntegral = cumtrapz(input, stopLeftIndex2, stopRightIndex2);
+
+        // check which width is smaller, Laser area should always be the one with the lesser area.
+        boolean laserFirst = (stopRightIndex - stopLeftIndex) < (stopRightIndex2 - stopLeftIndex2);
+
+        double laserArea;
+        double dataArea;
+
+        if (laserFirst) {
+            laserArea = firstIntegral;
+            dataArea = secondIntegral;
+        } else {
+            laserArea = secondIntegral;
+            dataArea = firstIntegral;
+        }
+
+        laserAreas[index] = laserArea;
+        dataAreas[index] = dataArea;
     }
 
-    private void setRGBSpecData(LineChart lineChart) {
-        int length = rgb_spec[current].length / 3;
+    private NmScaleInfo calcNm(int length) {
 
         double nmScale = (ELISAApplication.RED_LASER_NM - ELISAApplication.GREEN_LASER_NM) /
                 (ELISAApplication.RED_LASER_PEAK - ELISAApplication.GREEN_LASER_PEAK);
 
         double nmOff = ELISAApplication.GREEN_LASER_NM - nmScale * ELISAApplication.GREEN_LASER_PEAK;
 
-        double[] nm = new double[length];
+        double [] nm = new double[length];
         for (int i = 0; i < length; ++i) {
             nm[i] = nmScale * i + nmOff;
         }
@@ -502,35 +582,87 @@ public class SampleProcActivity extends AppCompatActivity {
         while (nm[startIdx] > 700) {
             ++startIdx;
         }
+
         int endIdx = startIdx;
         while (endIdx < (length - 1) && nm[endIdx] >= 380) {
             ++endIdx;
         }
 
+        return new NmScaleInfo(startIdx, endIdx, nm);
+    }
+
+    private void setPreprocessedFluoroscentDataAll() {
+
+        // its already been set for all
+        if (preprocessedFluoroscentData[0] != null) {
+            return;
+        }
+
+        setRgbForAll();
+
+        NmScaleInfo nmScaleInfo = calcNm(rgb_spec[0].length / 3);
+        int startIdx = nmScaleInfo.startIdx, endIdx = nmScaleInfo.endIdx;
+
+        for (int index = 0; index < numPeaks; index++) {
+            preprocessedFluoroscentData[index] = new double[endIdx - startIdx + 1];
+            for (int i = startIdx; i <= endIdx; ++i) {
+                preprocessedFluoroscentData[index][i - startIdx] =
+                        (rgb_spec[index][3 * i] + rgb_spec[index][3 * i + 1] + rgb_spec[index][3 * i + 2]);
+            }
+        }
+    }
+
+    private void setNormalizedFluoroscentData() {
+
+        setPreprocessedFluoroscentDataAll();
+
+        for (int index = 0; index < numPeaks; index++) {
+
+            if (normalizedFluoroscentData[index] == null) {
+
+                setRgbForAll();
+                setAreasAll();
+
+                NmScaleInfo nmScaleInfo = calcNm(rgb_spec[index].length / 3);
+                int startIdx  = nmScaleInfo.startIdx, endIdx = nmScaleInfo.endIdx;
+
+                normalizedFluoroscentData[index] = new double[endIdx - startIdx + 1];
+                for (int i = startIdx; i <= endIdx; ++i) {
+                    double dataPoint = preprocessedFluoroscentData[index][i - startIdx] /
+                                    Math.sqrt(Math.sqrt(laserAreas[index] * laserAreasAverage));
+
+                    if (dataPoint > laserAreasMax) {
+                        laserAreasMax = dataPoint;
+                    }
+                    normalizedFluoroscentData[index][i - startIdx] = dataPoint;
+                }
+            }
+        }
+    }
+
+    private void setRGBSpecData(LineChart lineChart) {
+        lineChart.invalidate();
+        lineChart.getAxisLeft().resetAxisMaxValue();
+
+        reassignCurrent();
+        setPreprocessedFluoroscentDataAll();
+
+        ArrayList<Entry> yRedVals = new ArrayList<>();
         ArrayList<String> xVals = new ArrayList<>();
+
+        NmScaleInfo nmScaleInfo = calcNm(rgb_spec[current].length/3);
+
+        int startIdx = nmScaleInfo.startIdx, endIdx = nmScaleInfo.endIdx;
+        double [] nm = nmScaleInfo.nm;
+
         for (int i = endIdx; i >= startIdx; --i) {
             xVals.add((float) nm[i] + "");
         }
 
-        double[] red = new double[endIdx - startIdx + 1];
-        double[] green = new double[endIdx - startIdx + 1];
-        double[] blue = new double[endIdx - startIdx + 1];
-        for (int i = startIdx; i <= endIdx; ++i) {
-            red[i-startIdx] = rgb_spec[current][3*i];
-            green[i-startIdx] = rgb_spec[current][3*i + 1];
-            blue[i-startIdx] = rgb_spec[current][3*i + 2];
-        }
-
-
-        ArrayList<Entry> yRedVals = new ArrayList<>();
-//        ArrayList<Entry> yGreenVals = new ArrayList<>();
-//        ArrayList<Entry> yBlueVals = new ArrayList<>();
-
         for (int i = endIdx; i >= startIdx; --i) {
             int idx = endIdx - i;
-            yRedVals.add(new Entry((float)(red[i-startIdx] + green[i - startIdx] + blue[i - startIdx]), idx));
+            yRedVals.add(new Entry((float)(preprocessedFluoroscentData[current][i - startIdx]), idx));
         }
-
 
         LineDataSet setRed = new LineDataSet(yRedVals, "Color Spectrum");
         setRed.setDrawCircles(false);
@@ -582,38 +714,27 @@ public class SampleProcActivity extends AppCompatActivity {
     }
 
     private void setNormalizedFluoroscentChart(LineChart lineChart) {
-        int length = rgb_spec[current].length / 3;
+        reassignCurrent();
+        setNormalizedFluoroscentData();
 
-        double nmScale = (ELISAApplication.RED_LASER_NM - ELISAApplication.GREEN_LASER_NM) /
-                (ELISAApplication.RED_LASER_PEAK - ELISAApplication.GREEN_LASER_PEAK);
+        lineChart.invalidate();
+        lineChart.getAxisLeft().setAxisMaxValue((float)laserAreasMax);
 
-        double nmOff = ELISAApplication.GREEN_LASER_NM - nmScale * ELISAApplication.GREEN_LASER_PEAK;
+        NmScaleInfo nmScaleInfo = calcNm(rgb_spec[current].length/3);
 
-        double[] nm = new double[length];
-        for (int i = 0; i < length; ++i) {
-            nm[i] = nmScale * i + nmOff;
-        }
-
-        int startIdx = 0;
-        while (nm[startIdx] > 700) {
-            ++startIdx;
-        }
-        int endIdx = startIdx;
-        while (endIdx < (length - 1) && nm[endIdx] >= 380) {
-            ++endIdx;
-        }
+        int startIdx = nmScaleInfo.startIdx, endIdx = nmScaleInfo.endIdx;
+        double [] nm = nmScaleInfo.nm;
 
         ArrayList<String> xVals = new ArrayList<>();
         for (int i = endIdx; i >= startIdx; --i) {
             xVals.add((float) nm[i] + "");
         }
 
-
         ArrayList<Entry> yRedVals = new ArrayList<>();
 
         for (int i = endIdx; i >= startIdx; --i) {
             int idx = endIdx - i;
-            yRedVals.add(new Entry((float)(normalizedFluoroscentData[current][idx]), idx));
+            yRedVals.add(new Entry((float)(normalizedFluoroscentData[current][i - startIdx]), idx));
         }
 
 
@@ -622,20 +743,8 @@ public class SampleProcActivity extends AppCompatActivity {
         setRed.setColor(Color.WHITE);
         setRed.setLineWidth(1f);
 
-//        LineDataSet setGreen = new LineDataSet(yGreenVals, "Green Spectrum");
-//        setGreen.setDrawCircles(false);
-//        setGreen.setColor(Color.GREEN);
-//        setGreen.setLineWidth(1f);
-
-//        LineDataSet setBlue = new LineDataSet(yBlueVals, "Blue Spectrum");
-//        setBlue.setDrawCircles(false);
-//        setBlue.setColor(Color.BLUE);
-//        setBlue.setLineWidth(1f);
-
         ArrayList<LineDataSet> dataSets = new ArrayList<>();
         dataSets.add(setRed); // add the datasets
-//        dataSets.add(setGreen);
-//        dataSets.add(setBlue);
 
 
         LineData data = new LineData(xVals, dataSets);
@@ -679,6 +788,8 @@ public class SampleProcActivity extends AppCompatActivity {
     }
 
     private void setSampleAndBBData(LineChart lineChart) {
+        lineChart.invalidate();
+        lineChart.getAxisLeft().resetAxisMaxValue();
 
         int length = sample[current].length;
 
@@ -749,6 +860,7 @@ public class SampleProcActivity extends AppCompatActivity {
         rightAxis.setEnabled(false);
 
         YAxis leftAxis = lineChart.getAxisLeft();
+        leftAxis.resetAxisMaxValue();
         leftAxis.setTextSize(10f);
         leftAxis.setTextColor(Color.WHITE);
         leftAxis.setDrawGridLines(false);
@@ -771,6 +883,12 @@ public class SampleProcActivity extends AppCompatActivity {
     }
 
     private void setAbsData(LineChart lineChart) {
+        lineChart.invalidate();
+        lineChart.getAxisLeft().resetAxisMaxValue();
+
+        lineChart.invalidate();
+        lineChart.getAxisLeft().resetAxisMaxValue();
+
         int length = sample[current].length;
 
         double nmScale = (ELISAApplication.RED_LASER_NM - ELISAApplication.GREEN_LASER_NM) /
@@ -787,6 +905,7 @@ public class SampleProcActivity extends AppCompatActivity {
         while (nm[startIdx] > 700) {
             ++startIdx;
         }
+
         int endIdx = startIdx;
         while (endIdx < (length - 1) && nm[endIdx] >= 380) {
             ++endIdx;
@@ -833,6 +952,7 @@ public class SampleProcActivity extends AppCompatActivity {
         rightAxis.setEnabled(false);
 
         YAxis leftAxis = lineChart.getAxisLeft();
+        leftAxis.resetAxisMaxValue();
         leftAxis.setTextSize(10f);
         leftAxis.setTextColor(Color.WHITE);
         leftAxis.setDrawGridLines(false);

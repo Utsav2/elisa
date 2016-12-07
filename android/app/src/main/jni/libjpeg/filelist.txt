@@ -41,7 +41,7 @@ other include files are intended for internal use and would not normally
 be included by an application program.  (cjpeg/djpeg/etc do use jinclude.h,
 since its function is to improve portability of the whole IJG distribution.
 Most other applications will directly include the system include files they
-want, and hence won't need jinclude.h.)
+want, and hence won'nmScaleInfo need jinclude.h.)
 
 
 C source code files:

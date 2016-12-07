@@ -7,6 +7,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CheckedTextView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -19,11 +21,17 @@ public class ELISASetupActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_elisasetup);
+        final CheckBox ctv = (CheckBox)findViewById(R.id.save_to_disk_box);
         if (ELISAApplication.MODE_FLUORESCENT.equals(getIntent().getStringExtra(ELISAApplication.MODE_EXTRA))) {
             TextView tv = (TextView)findViewById(R.id.setup_elisa);
             tv.setText("Fluoroscent setup");
             TextView another = (TextView)findViewById(R.id.elisa_setup);
             another.setText("Fluoroscent setup");
+            findViewById(R.id.type_of_processing_text).setVisibility(View.INVISIBLE);
+            findViewById(R.id.type_of_processing_group).setVisibility(View.INVISIBLE);
+            findViewById(R.id.save_to_disk).setVisibility(View.VISIBLE);
+            findViewById(R.id.type_of_processing_group).setVisibility(View.INVISIBLE);
+            ctv.setVisibility(View.VISIBLE);
         }
 
         final Spinner numStdsSpinner = (Spinner) findViewById(R.id.num_stds);
@@ -39,6 +47,7 @@ public class ELISASetupActivity extends ActionBarActivity {
                         intent.putExtra(ELISAApplication.NUM_STDS, Integer.parseInt(numStdsSpinner.getSelectedItem().toString()));
                         intent.putExtra(ELISAApplication.MAX_NUM_REPLICATES, Integer.parseInt(numReplicatesSpinner.getSelectedItem().toString()));
                         intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
+                        intent.putExtra(ELISAApplication.SAVE_TO_DISK, ctv.isChecked());
                         startActivity(intent);
                         finish();
                     }

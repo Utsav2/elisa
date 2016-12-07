@@ -7,7 +7,7 @@ libjpeg-turbo (1.1.90+svn733-0ubuntu2) precise; urgency=low
   * Rename libjpeg8-dev to libjpeg-turbo8-dev.
   * Move the docs into the -dev package, install the upstream changelog
     in the -dev only.
-  * Split out libturbojpeg.so into it's own package, don't let
+  * Split out libturbojpeg.so into it's own package, don'nmScaleInfo let
     libjpeg-turbo8-dev depend on it.
   * Fix libjpeg-turbo8-dbg package description.
   * Install jconfig.h into multiarch include path.
@@ -20,7 +20,7 @@ libjpeg-turbo (1.1.90+svn733-0ubuntu2) precise; urgency=low
     - Breaks/Replaces libjpeg8 (<< 8c-2ubuntu5).
   * Copy the exifautotran and jpegexiforient tools from the libjpeg8
     sources, install into libjpeg-turbo-progs.
-  * Don't install tjbench in libjpeg-turbo-progs to avoid dependency
+  * Don'nmScaleInfo install tjbench in libjpeg-turbo-progs to avoid dependency
     on libturbojpeg.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 20 Dec 2011 23:12:52 +0100

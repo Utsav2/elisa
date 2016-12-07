@@ -344,7 +344,7 @@ Build Requirements
 
 -- Microsoft Visual C++ 2005 or later
 
-   If you don't already have Visual C++, then the easiest way to get it is by
+   If you don'nmScaleInfo already have Visual C++, then the easiest way to get it is by
    installing the Windows SDK:
 
    http://msdn.microsoft.com/en-us/windows/bb980924.aspx

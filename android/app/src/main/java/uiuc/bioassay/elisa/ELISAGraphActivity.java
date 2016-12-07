@@ -2,6 +2,7 @@ package uiuc.bioassay.elisa;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ELISAGraphActivity extends AppCompatActivity {
@@ -26,8 +28,8 @@ public class ELISAGraphActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_elisagraph);
-        Intent intent = getIntent();
-        double[] finalResult = intent.getDoubleArrayExtra(ELISAApplication.ELISA_ABS_RESULT);
+        final Intent intent = getIntent();
+        final double[] finalResult = intent.getDoubleArrayExtra(ELISAApplication.ELISA_ABS_RESULT);
         double[] stds = intent.getDoubleArrayExtra(ELISAApplication.ELISA_STDS);
         LineChart chart = (LineChart) findViewById(R.id.elisa_result_chart);
         setData(stds, finalResult, chart);
@@ -70,8 +72,6 @@ public class ELISAGraphActivity extends AppCompatActivity {
         xAxis.setTextSize(10f);
         xAxis.setTextColor(Color.WHITE);
         xAxis.setDrawGridLines(false);
-
-
 
         // YAxis
         YAxis rightAxis = lineChart.getAxisRight();

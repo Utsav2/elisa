@@ -36,7 +36,7 @@ On most non-Unix systems, you say:
 or
 	djpeg [switches] jpegfile  imagefile
 i.e., both the input and output files are named on the command line.  This
-style is a little more foolproof, and it loses no functionality if you don't
+style is a little more foolproof, and it loses no functionality if you don'nmScaleInfo
 have pipes.  (You can get this style on Unix too, if you prefer, by defining
 TWO_FILE_COMMANDLINE when you compile the programs; see install.txt.)
 
@@ -53,7 +53,7 @@ cjpeg recognizes the input image format automatically, with the exception
 of some Targa-format files.  You have to tell djpeg which format to generate.
 
 JPEG files are in the defacto standard JFIF file format.  There are other,
-less widely used JPEG-based file formats, but we don't support them.
+less widely used JPEG-based file formats, but we don'nmScaleInfo support them.
 
 All switch names may be abbreviated; for example, -grayscale may be written
 -gray or -gr.  Most of the "basic" switches can be abbreviated to as little as
@@ -72,7 +72,7 @@ The basic command line switches for cjpeg are:
 
 	-grayscale	Create monochrome JPEG file from color input.
 			Be sure to use this switch when compressing a grayscale
-			BMP file, because cjpeg isn't bright enough to notice
+			BMP file, because cjpeg isn'nmScaleInfo bright enough to notice
 			whether a BMP file uses only shades of gray.  By
 			saying -grayscale, you'll get a smaller JPEG file that
 			takes less time to process.
@@ -90,7 +90,7 @@ The basic command line switches for cjpeg are:
 			an "identification" field will not be automatically
 			recognized by cjpeg; for such files you must specify
 			-targa to make cjpeg treat the input as Targa format.
-			For most Targa files, you won't need this switch.
+			For most Targa files, you won'nmScaleInfo need this switch.
 
 The -quality switch lets you trade off compressed file size against quality of
 the reconstructed image: the higher the quality setting, the larger the JPEG
@@ -224,7 +224,7 @@ Switches for wizards:
 	-scans file	Use the scan script given in the specified text file.
 
 The "wizard" switches are intended for experimentation with JPEG.  If you
-don't know what you are doing, DON'T USE THEM.  These switches are documented
+don'nmScaleInfo know what you are doing, DON'T USE THEM.  These switches are documented
 further in the file wizard.txt.
 
 
@@ -336,7 +336,7 @@ Switches for advanced users:
 HINTS FOR CJPEG
 
 Color GIF files are not the ideal input for JPEG; JPEG is really intended for
-compressing full-color (24-bit) images.  In particular, don't try to convert
+compressing full-color (24-bit) images.  In particular, don'nmScaleInfo try to convert
 cartoons, line drawings, and other images that have only a few distinct
 colors.  GIF works great on these, JPEG does not.  If you want to convert a
 GIF to JPEG, you should experiment with cjpeg's -quality and -smooth options
@@ -394,7 +394,7 @@ If more space is needed than will fit in the available main memory (as
 determined by -maxmemory), temporary files will be used.  (MS-DOS versions
 will try to get extended or expanded memory first.)  The temporary files are
 often rather large: in typical cases they occupy three bytes per pixel, for
-example 3*800*600 = 1.44Mb for an 800x600 image.  If you don't have enough
+example 3*800*600 = 1.44Mb for an 800x600 image.  If you don'nmScaleInfo have enough
 free disk space, leave out -progressive and -optimize (for cjpeg) or specify
 -onepass (for djpeg).
 
@@ -501,7 +501,7 @@ This version of jpegtran also offers a lossless crop option, which discards
 data outside of a given image region but losslessly preserves what is inside.
 Like the rotate and flip transforms, lossless crop is restricted by the current
 JPEG format; the upper left corner of the selected region must fall on an iMCU
-boundary.  If it doesn't, then it is silently moved up and/or left to the
+boundary.  If it doesn'nmScaleInfo, then it is silently moved up and/or left to the
 nearest iMCU boundary (the lower right corner is unchanged.)
 
 The image can be losslessly cropped by giving the switch:
@@ -517,7 +517,7 @@ luminance channel is preserved exactly, so this is a better method of reducing
 to grayscale than decompression, conversion, and recompression.  This switch
 is particularly handy for fixing a monochrome picture that was mistakenly
 encoded as a color JPEG.  (In such a case, the space savings from getting rid
-of the near-empty chroma channels won't be large; but the decoding time for
+of the near-empty chroma channels won'nmScaleInfo be large; but the decoding time for
 a grayscale JPEG is substantially less than that for a color JPEG.)
 
 jpegtran also recognizes these switches that control what to do with "extra"
@@ -546,7 +546,7 @@ These work the same as in cjpeg or djpeg.
 THE COMMENT UTILITIES
 
 The JPEG standard allows "comment" (COM) blocks to occur within a JPEG file.
-Although the standard doesn't actually define what COM blocks are for, they
+Although the standard doesn'nmScaleInfo actually define what COM blocks are for, they
 are widely used to hold user-supplied text strings.  This lets you add
 annotations, titles, index terms, etc to your JPEG files, and later retrieve
 them as text.  COM blocks do not interfere with the image stored in the JPEG
@@ -565,7 +565,7 @@ security reasons.
 The switch "-verbose" (or just "-v") causes rdjpgcom to also display the JPEG
 image dimensions.  If you omit the input file name from the command line,
 the JPEG file is read from standard input.  (This may not work on some
-operating systems, if binary data can't be read from stdin.)
+operating systems, if binary data can'nmScaleInfo be read from stdin.)
 
 wrjpgcom adds a COM block, containing text you provide, to a JPEG file.
 Ordinarily, the COM block is added after any existing COM blocks, but you

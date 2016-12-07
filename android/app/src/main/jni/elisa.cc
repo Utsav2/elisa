@@ -580,15 +580,12 @@ namespace elisa {
             return -1;
         }
 
-        LOGD("%d", __LINE__);
         ofs_res.write(reinterpret_cast<char *>(&col_end), sizeof(col_end));
 
-        LOGD("%d", __LINE__);
         for (auto first = s.begin(), last = s.end(); first != last; ++first) {
             ofs_res.write(reinterpret_cast<char *>(&(*first)), sizeof(*first));
         }
 
-        LOGD("%d", __LINE__);
         ofs_res.close();
         return 0;
     }

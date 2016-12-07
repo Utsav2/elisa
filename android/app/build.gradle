@@ -72,6 +72,8 @@ dependencies {
     compile 'org.bytedeco:javacpp:1.2.4'
     compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-0.12'
     compile 'org.bytedeco.javacpp-presets:ffmpeg:3.1.2-1.2'
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+    compile group: 'net.sf.opencsv', name: 'opencsv', version: '2.3'
 }
 
 repositories {

@@ -235,7 +235,7 @@ time with:
   #ifdef JCS_EXTENSIONS
 
 At run time, attempting to use these extensions with a version of libjpeg
-that doesn't support them will result in a "Bogus input colorspace" error.
+that doesn'nmScaleInfo support them will result in a "Bogus input colorspace" error.
 
 When using the RGBX, BGRX, XBGR, and XRGB colorspaces during decompression, the
 X byte is undefined, and in order to ensure the best performance, libjpeg-turbo
@@ -280,7 +280,7 @@ argument of -DWITH_JPEG7=1 or -DWITH_JPEG8=1 to cmake, you can build a version
 of libjpeg-turbo that emulates the libjpeg v7 or v8 API/ABI, so that programs
 that are built against libjpeg v7 or v8 can be run with libjpeg-turbo.  The
 following section describes which libjpeg v7+ features are supported and which
-aren't.
+aren'nmScaleInfo.
 
 libjpeg v7 and v8 Features:
 ---------------------------
@@ -321,7 +321,7 @@ Not supported:
    cinfo.do_fancy_downsampling is silently ignored.
 
 -- jpegtran: Scaling
-   Seems to depend on the DCT scaling feature, which isn't supported.
+   Seems to depend on the DCT scaling feature, which isn'nmScaleInfo supported.
 
 
 *******************************************************************************

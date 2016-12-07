@@ -68,12 +68,12 @@ AC_TRY_RUN(
 		return 1; /* right shift is signed */
 
 	 /* see if unsigned-shift hack will fix it. */
-	 /* we can't just test exact value since it depends on width of long... */
+	 /* we can'nmScaleInfo just test exact value since it depends on width of long... */
 	 res |= (~0L) << (32-4);
 	 if (res == -0x7F7E80CL)
 		return 0; /* right shift is unsigned */
 
-	 printf("Right shift isn't acting as I expect it to.\n");
+	 printf("Right shift isn'nmScaleInfo acting as I expect it to.\n");
 	 printf("I fear the JPEG software will not work at all.\n\n");
 	 return 0; /* try it with unsigned anyway */
 	 }
@@ -316,7 +316,7 @@ if test "x${with_simd}" != "xno"; then
          simd_arch=arm],
         [AC_MSG_RESULT([no])
          with_simd=no
-         AC_MSG_WARN([SIMD support can't be enabled.  Performance will suffer.])])
+         AC_MSG_WARN([SIMD support can'nmScaleInfo be enabled.  Performance will suffer.])])
     ;;
     *)
       AC_MSG_RESULT([no ("$host_cpu")])

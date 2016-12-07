@@ -226,56 +226,6 @@ public class CameraActivity extends AppCompatActivity implements
      */
     private GoogleApiClient client;
 
-
-    // a helper method only present to test the code with a pre-existing image asset
-    private String assetToImage(String name) {
-        File cacheFile = getOutputImageFile(folder, 0);
-        try {
-            InputStream inputStream = getAssets().open(name);
-            try {
-                FileOutputStream outputStream = new FileOutputStream(cacheFile);
-                try {
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = inputStream.read(buf)) > 0) {
-                        outputStream.write(buf, 0, len);
-                    }
-                } finally {
-                    outputStream.close();
-                }
-            } finally {
-                inputStream.close();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not open image", e);
-        }
-
-        try {
-            copy(cacheFile, getOutputImageFile(folder, 1));
-            copy(cacheFile, getOutputImageFile(folder, 2));
-            copy(cacheFile, getOutputImageFile(folder, 3));
-            copy(cacheFile, getOutputImageFile(folder, 4));
-            copy(cacheFile, getOutputImageFile(folder, 5));
-            copy(cacheFile, getOutputImageFile(folder, 6));
-            copy(cacheFile, getOutputImageFile(folder, 7));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return cacheFile.getAbsolutePath();
-    }
-
-
-    public void copy(File src, File dst) throws IOException {
-        FileInputStream inStream = new FileInputStream(src);
-        FileOutputStream outStream = new FileOutputStream(dst);
-        FileChannel inChannel = inStream.getChannel();
-        FileChannel outChannel = outStream.getChannel();
-        inChannel.transferTo(0, inChannel.size(), outChannel);
-        inStream.close();
-        outStream.close();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -292,29 +242,6 @@ public class CameraActivity extends AppCompatActivity implements
         // stop deleting
 
         isVideoMode = action.equals(ELISAApplication.ACTION_MULTIPLE_SAMPLE) && modeExtra.equals(ELISAApplication.MODE_FLUORESCENT);
-
-        //TODO(utsav) delete
-        if (!isVideoMode) {
-            assetToImage("image.jpg");
-            exportLocationToFile();
-            Intent intent = new Intent(CameraActivity.this, BBProcActivity.class);
-            intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
-            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
-            startActivity(intent);
-            finish();
-            if (true) {
-                return;
-            }
-        } else {
-            Intent intent = new Intent(CameraActivity.this, SampleProcActivity.class);
-            intent.setAction(ELISAApplication.ACTION_MULTIPLE_SAMPLE);
-            intent.putExtra(ELISAApplication.MODE_EXTRA, modeExtra);
-            intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
-            intent.putExtra(ELISAApplication.VIDEO_EXTRA, getOutputVideoFile(folder).getAbsolutePath());
-            intent.putExtra(ELISAApplication.NUM_PEAKS, getIntent().getIntExtra(ELISAApplication.NUM_PEAKS, -1));
-            startActivity(intent);
-            finish();
-        }
 
         surfaceView = (SurfaceView) findViewById(R.id.surface_camera);
         surfaceView.setEnabled(false);
@@ -341,6 +268,7 @@ public class CameraActivity extends AppCompatActivity implements
                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder);
                             intent.putExtra(ELISAApplication.VIDEO_EXTRA, getOutputVideoFile(folder).getAbsolutePath());
                             intent.putExtra(ELISAApplication.NUM_PEAKS, getIntent().getIntExtra(ELISAApplication.NUM_PEAKS, -1));
+                            intent.putExtra(ELISAApplication.INT_EXTRA, getIntent().getIntExtra(ELISAApplication.INT_EXTRA, -1));
                             startActivity(intent);
                             finish();
                         } else if (isVideoMode) {

@@ -1,5 +1,5 @@
 # Anything that must be linked against the shared C library on Windows must
-# be built in this subdirectory, because CMake doesn't allow us to override
+# be built in this subdirectory, because CMake doesn'nmScaleInfo allow us to override
 # the compiler flags for each build type except at directory scope.  Note
 # to CMake developers:  Add a COMPILE_FLAGS_<CONFIG> target property, or
 # better yet, provide a friendly way of configuring a Windows target to use the
@@ -20,7 +20,7 @@ foreach(src ${JPEG_SOURCES})
 endforeach()
 
 if(WITH_SIMD)
-  # This tells CMake that the "source" files haven't been generated yet
+  # This tells CMake that the "source" files haven'nmScaleInfo been generated yet
   set_source_files_properties(${SIMD_OBJS} PROPERTIES GENERATED 1)
 endif()
 

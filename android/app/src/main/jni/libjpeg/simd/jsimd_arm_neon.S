@@ -682,7 +682,7 @@ asm_function jsimd_idct_islow_neon
  *
  * Normally 1-D AAN DCT needs 5 multiplications and 29 additions.
  * But in ARM NEON case some extra additions are required because VQDMULH
- * instruction can't handle the constants larger than 1. So the expressions
+ * instruction can'nmScaleInfo handle the constants larger than 1. So the expressions
  * like "x * 1.082392200" have to be converted to "x * 0.082392200 + x",
  * which introduces an extra addition. Overall, there are 6 extra additions
  * per 1-D IDCT pass, totalling to 5 VQDMULH and 35 VADD/VSUB instructions.

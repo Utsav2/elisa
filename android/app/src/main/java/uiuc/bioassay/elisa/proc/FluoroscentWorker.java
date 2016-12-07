@@ -41,7 +41,6 @@ import static org.bytedeco.javacpp.opencv_core.cvOpenFileStorage;
 import static org.bytedeco.javacpp.opencv_core.minMaxLoc;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.accumulate;
-import static uiuc.bioassay.elisa.ELISAApplication.processBB;
 import static uiuc.bioassay.elisa.ELISAApplication.processF;
 
 public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
@@ -96,44 +95,11 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
     protected Integer doInBackground(String... params) {
         folder = params[0];
         String videoFile = params[1];
-        //todo(utsav) use this value instead of 8
         int numPeaks = Integer.parseInt(params[2]);
-        // TODO(utsav) replace this with actual camera footage
-        // startProcessingVideo(assetToVideoFile("MOV_0051.MP4"));
-        // TODO(utsav) delete
-        for (int i = 0; i < 8; i++) {
-            aa(i);
-        }
-
+        startProcessingVideo(videoFile, numPeaks);
         int ret = processF(folder + File.separator);
         Log.d(TAG, "here " + ret);
         return ret;
-    }
-
-    // a helper method only present to test the code with a pre-existing mp4 asset
-    private String assetToVideoFile(String name) {
-        File cacheFile = new File(mContext.getCacheDir(), name);
-        try {
-            InputStream inputStream = mContext.getAssets().open(name);
-            try {
-                FileOutputStream outputStream = new FileOutputStream(cacheFile);
-                try {
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while ((len = inputStream.read(buf)) > 0) {
-                        outputStream.write(buf, 0, len);
-                    }
-                } finally {
-                    outputStream.close();
-                }
-            } finally {
-                inputStream.close();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not open video", e);
-        }
-        System.gc();
-        return cacheFile.getAbsolutePath();
     }
 
     static class MatrixInfo {
@@ -168,13 +134,13 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
         }
     }
 
-    private void startProcessingVideo(String videoFile) {
+    private void startProcessingVideo(String videoFile, int numPeaks) {
         FFmpegFrameGrabber videoGrabber = new FFmpegFrameGrabber(videoFile);
         videoGrabber.setFormat("mp4");
         OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
         List<MatrixInfo> mats = new ArrayList<>();
         PriorityQueue<MatrixInfo> infoPriorityQueue = new PriorityQueue<>(
-                ELISAApplication.MAX_PICTURE, // initial capacity
+                numPeaks, // initial capacity
                 new MatrixMeanComparator()
         );
 
@@ -197,7 +163,7 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
                 Mat main = converterToMat.convert(vFrame);
                 Mat m  = main.apply(r1, r2);
                 double mean = opencv_core.mean(m).magnitude();
-                if (mean < 2) {
+                if (mean < 1) {
                     m._deallocate();
                     main._deallocate();
                     continue;
@@ -211,7 +177,6 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
                 // end heavy operation
 
                 main._deallocate();
-                mat._deallocate();
                 m._deallocate();
                 MatrixInfo matrixInfo = new MatrixInfo(mat, count, mean);
                 Log.v(TAG, "count: " + count + "mean: " + matrixInfo.mean);
@@ -227,12 +192,11 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
             }
         };
 
-        double threshold = 0.2 * max;
-        Log.v(TAG, "threshold: " + threshold);
+        double thresholdValue = ELISAApplication.FLUOROSCENT_FRAME_AREA_THRESHOLD * max;
 
         List<MatrixInfo> outs = new ArrayList<>();
 
-        for (int i = 0; i < ELISAApplication.MAX_PICTURE; i++) {
+        for (int i = 0; i < numPeaks; i++) {
             List<Mat> framesToAverage = new ArrayList<>();
             MatrixInfo t = infoPriorityQueue.remove();
             framesToAverage.add(t.m);
@@ -241,7 +205,7 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
             int rightIndex = t.index + 1;
             for(int j = leftIndex; j >= 0; j--) {
                 MatrixInfo m = mats.get(j);
-                if (m.mean < threshold) {
+                if (m.mean < thresholdValue) {
                     break;
                 }
                 infoPriorityQueue.remove(m);
@@ -250,7 +214,7 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
 
             for (int j = rightIndex; j < count; j++) {
                 MatrixInfo m = mats.get(j);
-                if (m.mean < threshold) {
+                if (m.mean < thresholdValue) {
                     break;
                 }
                 infoPriorityQueue.remove(m);
@@ -286,8 +250,6 @@ public class FluoroscentWorker extends AsyncTask<String, Void, Integer> {
         }
         return opencv_core.multiply(expr.asMat(), 1.0/mats.size()).asMat();
     }
-
-    int current = 1;
 
     @Override
     protected void onPostExecute(Integer result) {

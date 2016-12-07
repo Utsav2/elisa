@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -23,8 +24,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
+import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import au.com.bytecode.opencsv.CSVWriter;
 import uiuc.bioassay.elisa.camera.CameraActivity;
 
 import static uiuc.bioassay.elisa.ELISAApplication.ELISA_PROC_MODE;
@@ -40,6 +46,7 @@ public class ELISAResultActivity extends AppCompatActivity {
     private String mode;
     private int maxNumReplicates;
     private double[] absorptions;
+    private double[][] fluoroscentResults;
     private int[] numReplicates;
     private EditText[] editTexts;
     private boolean dataRetrieving = false;
@@ -60,6 +67,8 @@ public class ELISAResultActivity extends AppCompatActivity {
         }
         drawTable(numStds, maxNumReplicates);
         absorptions = new double[numStds];
+        fluoroscentResults = new double[maxNumReplicates][];
+
         for (int i = 0; i < absorptions.length; ++i) {
             absorptions[i] = 0;
         }
@@ -77,29 +86,56 @@ public class ELISAResultActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which) {
                                     case DialogInterface.BUTTON_POSITIVE:
-                                        double[] finalResult = new double[absorptions.length];
-                                        for (int i = 0; i < finalResult.length; ++i) {
-                                            Log.d(TAG, "" + numReplicates[i]);
-                                            if (numReplicates[i] == 0) {
-                                                finalResult[i] = 0;
-                                            } else {
-                                                finalResult[i] = absorptions[i] / numReplicates[i];
+                                        if (!mode.equals(MODE_FLUORESCENT)) {
+                                            double[] finalResult = new double[absorptions.length];
+                                            for (int i = 0; i < finalResult.length; ++i) {
+                                                Log.d(TAG, "" + numReplicates[i]);
+                                                if (numReplicates[i] == 0) {
+                                                    finalResult[i] = 0;
+                                                } else {
+                                                    finalResult[i] = absorptions[i] / numReplicates[i];
+                                                }
                                             }
-                                        }
-                                        double[] stds = new double[absorptions.length];
-                                        for (int i = 0; i < stds.length; ++i) {
-                                            if (editTexts[i].getText().toString().equals("")) {
-                                                Toast.makeText(ELISAResultActivity.this, "Please fill in the std concentration", Toast.LENGTH_LONG).show();
-                                                editTexts[i].requestFocus();
-                                                return;
+                                            double[] stds = new double[absorptions.length];
+                                            for (int i = 0; i < stds.length; ++i) {
+                                                if (editTexts[i].getText().toString().equals("")) {
+                                                    Toast.makeText(ELISAResultActivity.this, "Please fill in the std concentration", Toast.LENGTH_LONG).show();
+                                                    editTexts[i].requestFocus();
+                                                    return;
+                                                }
+                                                stds[i] = Double.parseDouble(editTexts[i].getText().toString());
                                             }
-                                            stds[i] = Double.parseDouble(editTexts[i].getText().toString());
+                                            Intent intentGraph = new Intent(ELISAResultActivity.this, ELISAGraphActivity.class);
+                                            intentGraph.putExtra(ELISAApplication.ELISA_ABS_RESULT, finalResult);
+                                            intentGraph.putExtra(ELISAApplication.ELISA_STDS, stds);
+                                            startActivity(intentGraph);
+                                            finish();
+                                        } else {
+                                            double[] finalResult = new double[numStds];
+                                            for (int i = 0; i < finalResult.length; ++i) {
+                                                double sum = 0;
+                                                for (int j = 0; j < maxNumReplicates; j++) {
+                                                    if (fluoroscentResults[j] == null) {
+                                                        Toast.makeText(ELISAResultActivity.this, "Please take all the replicates", Toast.LENGTH_LONG).show();
+                                                        return;
+                                                    }
+                                                    sum += fluoroscentResults[j][i];
+                                                }
+                                                finalResult[i] = sum / maxNumReplicates;
+                                            }
+                                            double[] stds = new double[numStds];
+                                            for (int i = 0; i < stds.length; ++i) {
+                                                stds[i] = Double.parseDouble(editTexts[i].getText().toString());
+                                            }
+                                            Intent intentGraph = new Intent(ELISAResultActivity.this, ELISAGraphActivity.class);
+                                            intentGraph.putExtra(ELISAApplication.ELISA_ABS_RESULT, finalResult);
+                                            intentGraph.putExtra(ELISAApplication.ELISA_STDS, stds);
+                                            startActivity(intentGraph);
+                                            if (getIntent().getBooleanExtra(ELISAApplication.SAVE_TO_DISK, false)) {
+                                                saveToDisk(stds, finalResult);
+                                            }
+                                            finish();
                                         }
-                                        Intent intentGraph = new Intent(ELISAResultActivity.this, ELISAGraphActivity.class);
-                                        intentGraph.putExtra(ELISAApplication.ELISA_ABS_RESULT, finalResult);
-                                        intentGraph.putExtra(ELISAApplication.ELISA_STDS, stds);
-                                        startActivity(intentGraph);
-                                        finish();
                                         break;
 
                                     case DialogInterface.BUTTON_NEGATIVE:
@@ -142,6 +178,28 @@ public class ELISAResultActivity extends AppCompatActivity {
         });
     }
 
+    private void saveToDisk(double [] stds, double [] finalResults) {
+
+        if (BuildConfig.DEBUG && (stds.length != finalResults.length)) {
+            throw new RuntimeException("lengths should be the same: " + stds.length + " " + finalResults.length);
+        }
+
+        File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File newFile = new File(downloads, System.currentTimeMillis() + ".csv");
+        try {
+            CSVWriter csvWriter = new CSVWriter(new FileWriter(newFile.getAbsolutePath()), ',');
+            for (int i = 0; i < stds.length; i++) {
+                String [] line = { String.valueOf(stds[i]), String.valueOf(finalResults[i]) };
+                csvWriter.writeNext(line);
+            }
+            csvWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, "error", e);
+        }
+        Toast.makeText(ELISAResultActivity.this, "Saving to disk: " + newFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -166,10 +224,13 @@ public class ELISAResultActivity extends AppCompatActivity {
 
     void drawFluoroscentTable(final int numSamples) {
         findViewById(R.id.f_table_text).setVisibility(View.VISIBLE);
+        TextView tv = (TextView)findViewById(R.id.result_table_text);
+        tv.setText("Fluoroscent result table");
         ScrollView fScrollView = (ScrollView)findViewById(R.id.scroll_view_f);
         fScrollView.setVisibility(View.VISIBLE);
         TableLayout fTableLayout = (TableLayout)findViewById(R.id.fluoroscent_table);
-        TableLayout.LayoutParams lp = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT);
+        TableLayout.LayoutParams lp = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.MATCH_PARENT);
         TableRow headerRow = new TableRow(this);
 
         TextView placeHolder = new TextView(this);
@@ -220,6 +281,7 @@ public class ELISAResultActivity extends AppCompatActivity {
                                             intent.putExtra(ELISAApplication.NUM_PEAKS, numSamples);
                                             intent.putExtra(ELISAApplication.FOLDER_EXTRA, folder + File.separator);
                                             intent.putExtra(ELISAApplication.ELISA_PROC_MODE, procMode);
+                                            intent.putExtra(ELISAApplication.INT_EXTRA, finalI);
                                             startActivity(intent);
                                             break;
 
@@ -230,7 +292,7 @@ public class ELISAResultActivity extends AppCompatActivity {
                                 }
                             };
                             AlertDialog.Builder builder = new AlertDialog.Builder(ELISAResultActivity.this);
-                            builder.setTitle("Are you sure that you want to take new sample?")
+                            builder.setTitle("Are you sure that you want to take a new sample?")
                                     .setPositiveButton("Yes", dialogClickListener)
                                     .setNegativeButton("No", dialogClickListener).show();
                         }
@@ -242,8 +304,12 @@ public class ELISAResultActivity extends AppCompatActivity {
     }
 
     void drawTable(final int nRows, final int nCols) {
+
         tableLayout = (TableLayout) findViewById(R.id.result_table);
-        TableLayout.LayoutParams lp = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT);
+        TableLayout.LayoutParams lp = new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.MATCH_PARENT
+        );
 
         // Initialize header column
         TableRow headerRow = new TableRow(this);
@@ -368,23 +434,47 @@ public class ELISAResultActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (dataRetrieving) {
-            Log.d(TAG, "zzzzz: " + ELISAApplication.currentSampleIdx);
-            int i = ELISAApplication.currentSampleIdx / maxNumReplicates;
-            int j = ELISAApplication.currentSampleIdx % maxNumReplicates;
-            TableRow tableRow = (TableRow) tableLayout.getChildAt(i + 1);
-            Button button = (Button) tableRow.getChildAt(j + 1);
-            TextView textView = (TextView) tableRow.getChildAt(maxNumReplicates + 1);
-            String oldButtonText = button.getText().toString();
-            Log.d(TAG, ELISAApplication.resultSampleAbs + "");
-            if (oldButtonText.equals("")) {
-                absorptions[i] += ELISAApplication.resultSampleAbs;
-                numReplicates[i] += 1;
+            if (!mode.equals(MODE_FLUORESCENT)) {
+                Log.d(TAG, "zzzzz: " + ELISAApplication.currentSampleIdx);
+                int i = ELISAApplication.currentSampleIdx / maxNumReplicates;
+                int j = ELISAApplication.currentSampleIdx % maxNumReplicates;
+                TableRow tableRow = (TableRow) tableLayout.getChildAt(i + 1);
+                Button button = (Button) tableRow.getChildAt(j + 1);
+                TextView textView = (TextView) tableRow.getChildAt(maxNumReplicates + 1);
+                String oldButtonText = button.getText().toString();
+                Log.d(TAG, ELISAApplication.resultSampleAbs + "");
+                if (oldButtonText.equals("")) {
+                    absorptions[i] += ELISAApplication.resultSampleAbs;
+                    numReplicates[i] += 1;
+                } else {
+                    double oldResult = Double.parseDouble(oldButtonText);
+                    absorptions[i] = absorptions[i] - oldResult + ELISAApplication.resultSampleAbs;
+                }
+                button.setText("" + round(ELISAApplication.resultSampleAbs, 2));
+                textView.setText("" + round(absorptions[i] / numReplicates[i], 2));
+                dataRetrieving = false;
             } else {
-                double oldResult = Double.parseDouble(oldButtonText);
-                absorptions[i] = absorptions[i] - oldResult + ELISAApplication.resultSampleAbs;
+                int i = ELISAApplication.currentSampleIdx - 1;
+                Log.d(TAG, "currentSampleIdx" + i);
+                fluoroscentResults[i] =  ELISAApplication.currentNormalizedAreas.clone();
+                for (int j = 0; j < numStds; j++) {
+                    TableRow tableRow = (TableRow) tableLayout.getChildAt(j + 1);
+                    double sum = 0;
+                    TextView tv = (TextView) tableRow.getChildAt(i + 1);
+                    tv.setText("" + round(fluoroscentResults[i][j], 2));
+                    int setK = 0;
+                    for (int k = 0; k < maxNumReplicates; k++) {
+                        if (fluoroscentResults[k] != null) {
+                            setK++;
+                            sum += fluoroscentResults[k][j];
+                        }
+                    }
+                    TextView averageTextView = (TextView) tableRow.getChildAt(maxNumReplicates + 1);
+                    if (setK != 0) {
+                        averageTextView.setText("" + round(sum / setK, 2));
+                    }
+                }
             }
-            button.setText("" + round(ELISAApplication.resultSampleAbs, 2));
-            textView.setText("" + round(absorptions[i] / numReplicates[i], 2));
             dataRetrieving = false;
         }
     }

@@ -43,12 +43,16 @@ public class ELISAApplication extends Application {
 
     public static int currentSampleIdx;
     public static double resultSampleAbs;
+    public static double [] currentNormalizedAreas;
     public static final String ELISA_PROC_MODE = "ELISA_PROC_MODE";
     public static final String ELISA_ABS_RESULT = "ELISA_ABS_RESULT";
     public static final String ELISA_STDS = "ELISA_STDS";
     public static final int ELISA_PROC_MODE_450nm = 0;
     public static final int ELISA_PROC_MODE_FULL_INTEGRATION = 1;
-
+    public static final double FLUOROSCENT_FRAME_AREA_THRESHOLD = 0.2;
+    public static final double FLUOROSCENT_LASER_AND_DATA_AREA_THRESHOLD = 0.2;
+    public static final String NUM_PEAKS = "NUM_PEAKS";
+    public static final String SAVE_TO_DISK= "SAVE_TO_DISK";
 
 
     /*----------------------------------------------------------------------------*/
@@ -60,7 +64,6 @@ public class ELISAApplication extends Application {
     public static final String RES = "res.bin";
     public static final String RGB_SPEC = "rgb.bin";
     public static final int MAX_PICTURE = 8;
-    public static final String NUM_PEAKS = "NUM_PEAKS";
     /*----------------------------------------------------------------------------*/
 
     public static final String PILLS_FOLDER = "pills";

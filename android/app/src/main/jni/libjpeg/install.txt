@@ -15,14 +15,14 @@ familiarity with C programming and program build procedures for your system.
 If you are only using this software as part of a larger program, the larger
 program's installation procedure may take care of configuring the IJG code.
 For example, Ghostscript's installation script will configure the IJG code.
-You don't need to read this file if you just want to compile Ghostscript.
+You don'nmScaleInfo need to read this file if you just want to compile Ghostscript.
 
 If you are on a Unix machine, you may not need to read this file at all.
 Try doing
 	./configure
 	make
 	make test
-If that doesn't complain, do
+If that doesn'nmScaleInfo complain, do
 	make install
 (better do "make -n install" first to see if the makefile will put the files
 where you want them).  Read further if you run into snags or want to customize
@@ -119,11 +119,11 @@ if you want to compile without debugging support.
 into /usr/local/bin, /usr/local/man, etc.  You can specify an installation
 prefix other than "/usr/local" by giving configure the option "--prefix=PATH".
 
-* If you don't have a lot of swap space, you may need to enable the IJG
+* If you don'nmScaleInfo have a lot of swap space, you may need to enable the IJG
 software's internal virtual memory mechanism.  To do this, give the option
 "--enable-maxmem=N" where N is the default maxmemory limit in megabytes.
 This is discussed in more detail under "Selecting a memory manager", below.
-You probably don't need to worry about this on reasonably-sized Unix machines,
+You probably don'nmScaleInfo need to worry about this on reasonably-sized Unix machines,
 unless you plan to process very large images.
 
 Configure has some other features that are useful if you are cross-compiling
@@ -189,12 +189,12 @@ you may want to change the CC and CFLAGS definitions.  For instance, if you
 are using GCC, set CC=gcc.  If you had to use any compiler switches to get
 ckconfig.c to work, make sure the same switches are in CFLAGS.
 
-If you are on a system that doesn't use makefiles, you'll need to set up
+If you are on a system that doesn'nmScaleInfo use makefiles, you'll need to set up
 project files (or whatever you do use) to compile all the source files and
 link them into executable files cjpeg, djpeg, jpegtran, rdjpgcom, and wrjpgcom.
 See the file lists in any of the makefiles to find out which files go into
 each program.  Note that the provided makefiles all make a "library" file
-libjpeg first, but you don't have to do that if you don't want to; the file
+libjpeg first, but you don'nmScaleInfo have to do that if you don'nmScaleInfo want to; the file
 lists identify which source files are actually needed for compression,
 decompression, or both.  As a last resort, you can make a batch script that
 just compiles everything and links it all together; makefile.vms is an example
@@ -213,9 +213,9 @@ redirection and piping, like this:
 	source program | cjpeg >outputfile
 The simpler "two file" command line style is just
 	cjpeg inputfile outputfile
-You may prefer the two-file style, particularly if you don't have pipes.
+You may prefer the two-file style, particularly if you don'nmScaleInfo have pipes.
 
-You MUST use two-file style on any system that doesn't cope well with binary
+You MUST use two-file style on any system that doesn'nmScaleInfo cope well with binary
 data fed through stdin/stdout; this is true for some MS-DOS compilers, for
 example.  If you're not on a Unix system, it's safest to assume you need
 two-file style.  (But if your compiler provides either the Posix-standard
@@ -236,7 +236,7 @@ memory managers:
 * jmemansi.c	This version uses the ANSI-standard library routine tmpfile(),
 		which not all non-ANSI systems have.  On some systems
 		tmpfile() may put the temporary file in a non-optimal
-		location; if you don't like what it does, use jmemname.c.
+		location; if you don'nmScaleInfo like what it does, use jmemname.c.
 
 * jmemname.c	This version creates named temporary files.  For anything
 		except a Unix machine, you'll need to configure the
@@ -265,8 +265,8 @@ or jmemansi.obj for jmemansi.c).
 
 If you have plenty of (real or virtual) main memory, just use jmemnobs.c.
 "Plenty" means about ten bytes for every pixel in the largest images
-you plan to process, so a lot of systems don't meet this criterion.
-If yours doesn't, try jmemansi.c first.  If that doesn't compile, you'll have
+you plan to process, so a lot of systems don'nmScaleInfo meet this criterion.
+If yours doesn'nmScaleInfo, try jmemansi.c first.  If that doesn'nmScaleInfo compile, you'll have
 to use jmemname.c; be sure to adjust select_file_name() for local conditions.
 You may also need to change unlink() to remove() in close_backing_store().
 
@@ -274,13 +274,13 @@ Except with jmemnobs.c or jmemmac.c, you need to adjust the DEFAULT_MAX_MEM
 setting to a reasonable value for your system (either by adding a #define for
 DEFAULT_MAX_MEM to jconfig.h, or by adding a -D switch to the Makefile).
 This value limits the amount of data space the program will attempt to
-allocate.  Code and static data space isn't counted, so the actual memory
+allocate.  Code and static data space isn'nmScaleInfo counted, so the actual memory
 needs for cjpeg or djpeg are typically 100 to 150Kb more than the max-memory
 setting.  Larger max-memory settings reduce the amount of I/O needed to
 process a large image, but too large a value can result in "insufficient
 memory" failures.  On most Unix machines (and other systems with virtual
 memory), just set DEFAULT_MAX_MEM to several million and forget it.  At the
-other end of the spectrum, for MS-DOS machines you probably can't go much
+other end of the spectrum, for MS-DOS machines you probably can'nmScaleInfo go much
 above 300K to 400K.  (On MS-DOS the value refers to conventional memory only.
 Extended/expanded memory is handled separately by jmemdos.c.)
 
@@ -297,7 +297,7 @@ If your compiler complains about undefined structures, you should be able to
 shut it up by putting "#define INCOMPLETE_TYPES_BROKEN" in jconfig.h.
 
 If you have trouble with missing system include files or inclusion of the
-wrong ones, read jinclude.h.  This shouldn't happen if you used configure
+wrong ones, read jinclude.h.  This shouldn'nmScaleInfo happen if you used configure
 or ckconfig.c to set up jconfig.h.
 
 There are a fair number of routines that do not use all of their parameters;
@@ -305,7 +305,7 @@ some compilers will issue warnings about this, which you can ignore.  There
 are also a few configuration checks that may give "unreachable code" warnings.
 Any other warning deserves investigation.
 
-If you don't have a getenv() library routine, define NO_GETENV.
+If you don'nmScaleInfo have a getenv() library routine, define NO_GETENV.
 
 Also see the system-specific hints, below.
 
@@ -321,14 +321,14 @@ several forms:
 	testimg.jpg	The output of cjpeg testimg.ppm
 	testprog.jpg	Progressive-mode equivalent of testorig.jpg.
 	testimgp.jpg	The output of cjpeg -progressive -optimize testimg.ppm
-(The first- and second-generation .jpg files aren't identical since JPEG is
+(The first- and second-generation .jpg files aren'nmScaleInfo identical since JPEG is
 lossy.)  If you can generate duplicates of the testimg* files then you
 probably have working programs.
 
 With most of the makefiles, "make test" will perform the necessary
 comparisons.
 
-If you're using a makefile that doesn't provide the test option, run djpeg
+If you're using a makefile that doesn'nmScaleInfo provide the test option, run djpeg
 and cjpeg by hand and compare the output files to testimg* with whatever
 binary file comparison tool you have.  The files should be bit-for-bit
 identical.
@@ -350,7 +350,7 @@ works.  You should get the same results from "djpeg <testorig.jpg >out.ppm"
 as from "djpeg -outfile out.ppm testorig.jpg".  Note that the makefiles all
 use the latter style and therefore do not exercise stdin/stdout!  If this
 check fails, try recompiling with USE_SETMODE or USE_FDOPEN defined.
-If it still doesn't work, better use two-file style.
+If it still doesn'nmScaleInfo work, better use two-file style.
 
 If you chose a memory manager other than jmemnobs.c, you should test that
 temporary-file usage works.  Try "djpeg -bmp -colors 256 -max 0 testorig.jpg"
@@ -360,7 +360,7 @@ images handy, try compressing them with -optimize and/or decompressing with
 
 NOTE: this is far from an exhaustive test of the JPEG software; some modules,
 such as 1-pass color quantization, are not exercised at all.  It's just a
-quick test to give you some confidence that you haven't missed something
+quick test to give you some confidence that you haven'nmScaleInfo missed something
 major.
 
 
@@ -371,7 +371,7 @@ Once you're done with the above steps, you can install the software by
 copying the executable files (cjpeg, djpeg, jpegtran, rdjpgcom, and wrjpgcom)
 to wherever you normally install programs.  On Unix systems, you'll also want
 to put the man pages (cjpeg.1, djpeg.1, jpegtran.1, rdjpgcom.1, wrjpgcom.1)
-in the man-page directory.  The pre-fab makefiles don't support this step
+in the man-page directory.  The pre-fab makefiles don'nmScaleInfo support this step
 since there's such a wide variety of installation procedures on different
 systems.
 
@@ -382,7 +382,7 @@ to install the programs and their man pages into the standard places.
 	make -n install
 to see where configure thought the files should go.  You may need to edit
 the Makefile, particularly if your system's conventions for man page
-filenames don't match what configure expects.
+filenames don'nmScaleInfo match what configure expects.
 
 If you want to install the IJG library itself, for use in compiling other
 programs besides ours, then you need to put the four include files
@@ -407,7 +407,7 @@ fancier.
 Utah RLE file format support:
 
 We distribute the software with support for RLE image files (Utah Raster
-Toolkit format) disabled, because the RLE support won't compile without the
+Toolkit format) disabled, because the RLE support won'nmScaleInfo compile without the
 Utah library.  If you have URT version 3.1 or later, you can enable RLE
 support as follows:
 	1.  #define RLE_SUPPORTED in jconfig.h.
@@ -426,11 +426,11 @@ deeper than 8-bit data, you can compile the IJG code for 12-bit operation.
 To do so:
   1. In jmorecfg.h, define BITS_IN_JSAMPLE as 12 rather than 8.
   2. In jconfig.h, undefine BMP_SUPPORTED, RLE_SUPPORTED, and TARGA_SUPPORTED,
-     because the code for those formats doesn't handle 12-bit data and won't
+     because the code for those formats doesn'nmScaleInfo handle 12-bit data and won'nmScaleInfo
      even compile.  (The PPM code does work, as explained below.  The GIF
      code works too; it scales 8-bit GIF data to and from 12-bit depth
      automatically.)
-  3. Compile.  Don't expect "make test" to pass, since the supplied test
+  3. Compile.  Don'nmScaleInfo expect "make test" to pass, since the supplied test
      files are for 8-bit data.
 
 Currently, 12-bit support does not work on 16-bit-int machines.
@@ -456,7 +456,7 @@ format, maxval 4095, when compiled with BITS_IN_JSAMPLE=12.  Since this
 format is not yet widely supported, you can disable it by compiling wrppm.c
 with PPM_NORAWWORD defined; then the data is scaled down to 8 bits to make a
 standard 1-byte/sample PPM or PGM file.  (Yes, this means still another copy
-of djpeg to keep around.  But hopefully you won't need it for very long.
+of djpeg to keep around.  But hopefully you won'nmScaleInfo need it for very long.
 Poskanzer's supposed to get that new PBMPLUS release out Real Soon Now.)
 
 Of course, if you are working with 12-bit data, you probably have it stored
@@ -473,7 +473,7 @@ If you need to make a smaller version of the JPEG software, some optional
 functions can be removed at compile time.  See the xxx_SUPPORTED #defines in
 jconfig.h and jmorecfg.h.  If at all possible, we recommend that you leave in
 decoder support for all valid JPEG files, to ensure that you can read anyone's
-output.  Taking out support for image file formats that you don't use is the
+output.  Taking out support for image file formats that you don'nmScaleInfo use is the
 most painless way to make the programs smaller.  Another possibility is to
 remove some of the DCT methods: in particular, the "IFAST" method may not be
 enough faster than the others to be worth keeping on your machine.  (If you
@@ -488,7 +488,7 @@ Unless you own a Cray, you'll probably be interested in making the JPEG
 software go as fast as possible.  This section covers some machine-dependent
 optimizations you may want to try.  We suggest that before trying any of
 this, you first get the basic installation to pass the self-test step.
-Repeat the self-test after any optimization to make sure that you haven't
+Repeat the self-test after any optimization to make sure that you haven'nmScaleInfo
 broken anything.
 
 The integer DCT routines perform a lot of multiplications.  These
@@ -514,14 +514,14 @@ that the float DCT method is faster than the integer DCT methods, even
 after tweaking the integer multiply macros.  In that case you may want to
 make the float DCT be the default method.  (The only objection to this is
 that float DCT results may vary slightly across machines.)  To do that, add
-"#define JDCT_DEFAULT JDCT_FLOAT" to jconfig.h.  Even if you don't change
+"#define JDCT_DEFAULT JDCT_FLOAT" to jconfig.h.  Even if you don'nmScaleInfo change
 the default, you should redefine JDCT_FASTEST, which is the method selected
-by djpeg's -fast switch.  Don't forget to update the documentation files
+by djpeg's -fast switch.  Don'nmScaleInfo forget to update the documentation files
 (usage.txt and/or cjpeg.1, djpeg.1) to agree with what you've done.
 
 If access to "short" arrays is slow on your machine, it may be a win to
 define type JCOEF as int rather than short.  This will cost a good deal of
-memory though, particularly in some multi-pass modes, so don't do it unless
+memory though, particularly in some multi-pass modes, so don'nmScaleInfo do it unless
 you have memory to burn and short is REALLY slow.
 
 If your compiler can compile function calls in-line, make sure the INLINE
@@ -595,7 +595,7 @@ jconfig.h to do this.
 
 To use the 68881/68882 coprocessor for the floating point DCT, add the
 compiler option "-8" to the project files and replace pcfltlib.lib with
-pc881lib.lib in cjpeg.prj and djpeg.prj.  Or if you don't have a
+pc881lib.lib in cjpeg.prj and djpeg.prj.  Or if you don'nmScaleInfo have a
 coprocessor, you may prefer to remove the float DCT code by undefining
 DCT_FLOAT_SUPPORTED in jmorecfg.h (since without a coprocessor, the float
 code will be too slow to be useful).  In that case, you can delete
@@ -604,8 +604,8 @@ pcfltlib.lib from the project files.
 Note that you must make libjpeg.lib before making cjpeg.ttp, djpeg.ttp,
 or jpegtran.ttp.  You'll have to perform the self-test by hand.
 
-We haven't bothered to include project files for rdjpgcom and wrjpgcom.
-Those source files should just be compiled by themselves; they don't
+We haven'nmScaleInfo bothered to include project files for rdjpgcom and wrjpgcom.
+Those source files should just be compiled by themselves; they don'nmScaleInfo
 depend on the JPEG library.  You can use the default.prj project file
 of the Pure C distribution to make the programs.
 
@@ -657,14 +657,14 @@ provide a Unix-style command line interface.  You can use this interface on
 the Mac by means of the ccommand() library routine provided by Metrowerks
 CodeWarrior or Think C.  This is only appropriate for testing the library,
 however; to make a user-friendly equivalent of cjpeg/djpeg you'd really want
-to develop a Mac-style user interface.  There isn't a complete example
+to develop a Mac-style user interface.  There isn'nmScaleInfo a complete example
 available at the moment, but there are some helpful starting points:
 1. Sam Bushell's free "To JPEG" applet provides drag-and-drop conversion to
 JPEG under System 7 and later.  This only illustrates how to use the
 compression half of the library, but it does a very nice job of that part.
 The CodeWarrior source code is available from http://www.pobox.com/~jsam.
 2. Jim Brunner prepared a Mac-style user interface for both compression and
-decompression.  Unfortunately, it hasn't been updated since IJG v4, and
+decompression.  Unfortunately, it hasn'nmScaleInfo been updated since IJG v4, and
 the library's API has changed considerably since then.  Still it may be of
 some help, particularly as a guide to compiling the IJG code under Think C.
 Jim's code is available from the Info-Mac archives, at sumex-aim.stanford.edu
@@ -677,7 +677,7 @@ follow Mac conventions.  (That part of the code relies on System-7-or-later OS
 functions.  See the comments in jmemmac.c if you need to run it on System 6.)
 NOTE that USE_MAC_MEMMGR must be defined in jconfig.h to use jmemmac.c.
 
-You can also use jmemnobs.c, if you don't care about handling images larger
+You can also use jmemnobs.c, if you don'nmScaleInfo care about handling images larger
 than available memory.  If you use any memory manager back end other than
 jmemmac.c, we recommend replacing "malloc" and "free" by "NewPtr" and
 "DisposePtr", because Mac C libraries often have peculiar implementations of
@@ -693,10 +693,10 @@ You'll also need to define TWO_FILE_COMMANDLINE to avoid stdin/stdout.
 This means that when using the cjpeg/djpeg programs, you'll have to type the
 input and output file names in the "Arguments" text-edit box, rather than
 using the file radio buttons.  (Perhaps USE_FDOPEN or USE_SETMODE would
-eliminate the problem, but I haven't heard from anyone who's tried it.)
+eliminate the problem, but I haven'nmScaleInfo heard from anyone who's tried it.)
 
 On 680x0 Macs, Metrowerks defines type "double" as a 10-byte IEEE extended
-float.  jmemmgr.c won't like this: it wants sizeof(ALIGN_TYPE) to be a power
+float.  jmemmgr.c won'nmScaleInfo like this: it wants sizeof(ALIGN_TYPE) to be a power
 of 2.  Add "#define ALIGN_TYPE long" to jconfig.h to eliminate the complaint.
 
 The supplied configuration file jconfig.mac can be used for your jconfig.h;
@@ -715,17 +715,17 @@ includes detailed build instructions for Think C; it's probably somewhat
 out of date for the current release, but may be helpful.
 
 If you want to build the minimal command line version, proceed as follows.
-You'll have to prepare project files for the programs; we don't include any
+You'll have to prepare project files for the programs; we don'nmScaleInfo include any
 in the distribution since they are not text files.  Use the file lists in
 any of the supplied makefiles as a guide.  Also add the ANSI and Unix C
 libraries in a separate segment.  You may need to divide the JPEG files into
 more than one segment; we recommend dividing compression and decompression
 modules.  Define USE_CCOMMAND in jconfig.h so that the ccommand() routine is
 called.  You must also define TWO_FILE_COMMANDLINE because stdin/stdout
-don't handle binary data correctly.
+don'nmScaleInfo handle binary data correctly.
 
 On 680x0 Macs, Think C defines type "double" as a 12-byte IEEE extended float.
-jmemmgr.c won't like this: it wants sizeof(ALIGN_TYPE) to be a power of 2.
+jmemmgr.c won'nmScaleInfo like this: it wants sizeof(ALIGN_TYPE) to be a power of 2.
 Add "#define ALIGN_TYPE long" to jconfig.h to eliminate the complaint.
 
 jconfig.mac should work as a jconfig.h configuration file for Think C,
@@ -734,7 +734,7 @@ but the makeproj.mac AppleScript script is specific to CodeWarrior.  Sorry.
 
 MIPS R3000:
 
-MIPS's cc version 1.31 has a rather nasty optimization bug.  Don't use -O
+MIPS's cc version 1.31 has a rather nasty optimization bug.  Don'nmScaleInfo use -O
 if you have that compiler version.  (Use "cc -V" to check the version.)
 Note that the R3000 chip is found in workstations from DEC and others.
 
@@ -745,7 +745,7 @@ The IJG code is designed to work well in 80x86 "small" or "medium" memory
 models (i.e., data pointers are 16 bits unless explicitly declared "far";
 code pointers can be either size).  You may be able to use small model to
 compile cjpeg or djpeg by itself, but you will probably have to use medium
-model for any larger application.  This won't make much difference in
+model for any larger application.  This won'nmScaleInfo make much difference in
 performance.  You *will* take a noticeable performance hit if you use a
 large-data memory model, and you should avoid "huge" model if at all
 possible.  Be sure that NEED_FAR_POINTERS is defined in jconfig.h if you use
@@ -756,25 +756,25 @@ compile in medium model and define NEED_FAR_POINTERS.)
 The DOS-specific memory manager, jmemdos.c, should be used if possible.
 It needs some assembly-code routines which are in jmemdosa.asm; make sure
 your makefile assembles that file and includes it in the library.  If you
-don't have a suitable assembler, you can get pre-assembled object files for
+don'nmScaleInfo have a suitable assembler, you can get pre-assembled object files for
 jmemdosa by FTP from ftp.uu.net:/graphics/jpeg/jdosaobj.zip.  (DOS-oriented
 distributions of the IJG source code often include these object files.)
 
 When using jmemdos.c, jconfig.h must define USE_MSDOS_MEMMGR and must set
 MAX_ALLOC_CHUNK to less than 64K (65520L is a typical value).  If your
-C library's far-heap malloc() can't allocate blocks that large, reduce
+C library's far-heap malloc() can'nmScaleInfo allocate blocks that large, reduce
 MAX_ALLOC_CHUNK to whatever it can handle.
 
-If you can't use jmemdos.c for some reason --- for example, because you
-don't have an assembler to assemble jmemdosa.asm --- you'll have to fall
+If you can'nmScaleInfo use jmemdos.c for some reason --- for example, because you
+don'nmScaleInfo have an assembler to assemble jmemdosa.asm --- you'll have to fall
 back to jmemansi.c or jmemname.c.  You'll probably still need to set
-MAX_ALLOC_CHUNK in jconfig.h, because most DOS C libraries won't malloc()
+MAX_ALLOC_CHUNK in jconfig.h, because most DOS C libraries won'nmScaleInfo malloc()
 more than 64K at a time.  IMPORTANT: if you use jmemansi.c or jmemname.c,
 you will have to compile in a large-data memory model in order to get the
 right stdio library.  Too bad.
 
 wrjpgcom needs to be compiled in large model, because it malloc()s a 64KB
-work area to hold the comment text.  If your C library's malloc can't
+work area to hold the comment text.  If your C library's malloc can'nmScaleInfo
 handle that, reduce MAX_COM_LENGTH as necessary in wrjpgcom.c.
 
 Most MS-DOS compilers treat stdin/stdout as text files, so you must use
@@ -826,12 +826,12 @@ jconfig.mc6 already includes #define USE_SETMODE to make this work.
 Note that this makefile assumes that the working copy of itself is called
 "makefile".  If you want to call it something else, say "makefile.mak",
 be sure to adjust the dependency line that reads "$(RFILE) : makefile".
-Otherwise the make will fail because it doesn't know how to create "makefile".
+Otherwise the make will fail because it doesn'nmScaleInfo know how to create "makefile".
 Worse, some releases of Microsoft's make utilities give an incorrect error
 message in this situation.
 
 Old versions of MS C fail with an "out of macro expansion space" error
-because they can't cope with the macro TRACEMS8 (defined in jerror.h).
+because they can'nmScaleInfo cope with the macro TRACEMS8 (defined in jerror.h).
 If this happens to you, the easiest solution is to change TRACEMS8 to
 expand to nothing.  You'll lose the ability to dump out JPEG coefficient
 tables with djpeg -debug -debug, but at least you can compile.
@@ -849,14 +849,14 @@ Microsoft Windows (all versions), generic comments:
 
 Some Windows system include files define typedef boolean as "unsigned char".
 The IJG code also defines typedef boolean, but we make it "int" by default.
-This doesn't affect the IJG programs because we don't import those Windows
+This doesn'nmScaleInfo affect the IJG programs because we don'nmScaleInfo import those Windows
 include files.  But if you use the JPEG library in your own program, and some
 of your program's files import one definition of boolean while some import the
 other, you can get all sorts of mysterious problems.  A good preventive step
 is to make the IJG library use "unsigned char" for boolean.  To do that,
 add something like this to your jconfig.h file:
 	/* Define "boolean" as unsigned char, not int, per Windows custom */
-	#ifndef __RPCNDR_H__	/* don't conflict if rpcndr.h already read */
+	#ifndef __RPCNDR_H__	/* don'nmScaleInfo conflict if rpcndr.h already read */
 	typedef unsigned char boolean;
 	#endif
 	#define HAVE_BOOLEAN	/* prevent jmorecfg.h from redefining it */
@@ -890,7 +890,7 @@ The proper solution for problem 2 is to return control to your calling
 application after a library error.  This can be done with the setjmp/longjmp
 technique discussed in libjpeg.txt and illustrated in example.c.  (NOTE:
 some older Windows C compilers provide versions of setjmp/longjmp that
-don't actually work under Windows.  You may need to use the Windows system
+don'nmScaleInfo actually work under Windows.  You may need to use the Windows system
 functions Catch and Throw instead.)
 
 The recommended memory manager under Windows is jmemnobs.c; in other words,
@@ -912,7 +912,7 @@ functions.
 
 You may also want to modify jdatasrc.c and jdatadst.c to use Windows file
 operations rather than fread/fwrite.  This is only necessary if your C
-compiler doesn't provide a competent implementation of C stdio functions.
+compiler doesn'nmScaleInfo provide a competent implementation of C stdio functions.
 
 You might want to tweak the RGB_xxx macros in jmorecfg.h so that the library
 will accept or deliver color pixels in BGR sample order, not RGB; BGR order
@@ -923,14 +923,14 @@ the sample applications cjpeg/djpeg, but the library itself works fine.
 Many people want to convert the IJG library into a DLL.  This is reasonably
 straightforward, but watch out for the following:
 
-  1. Don't try to compile as a DLL in small or medium memory model; use
+  1. Don'nmScaleInfo try to compile as a DLL in small or medium memory model; use
 large model, or even better, 32-bit flat model.  Many places in the IJG code
 assume the address of a local variable is an ordinary (not FAR) pointer;
-that isn't true in a medium-model DLL.
+that isn'nmScaleInfo true in a medium-model DLL.
 
   2. Microsoft C cannot pass file pointers between applications and DLLs.
 (See Microsoft Knowledge Base, PSS ID Number Q50336.)  So jdatasrc.c and
-jdatadst.c don't work if you open a file in your application and then pass
+jdatadst.c don'nmScaleInfo work if you open a file in your application and then pass
 the pointer to the DLL.  One workaround is to make jdatasrc.c/jdatadst.c
 part of your main application rather than part of the DLL.
 
@@ -956,7 +956,7 @@ The unmodified IJG library presents a very C-specific application interface,
 so the resulting DLL is only usable from C or C++ applications.  There has
 been some talk of writing wrapper code that would present a simpler interface
 usable from other languages, such as Visual Basic.  This is on our to-do list
-but hasn't been very high priority --- any volunteers out there?
+but hasn'nmScaleInfo been very high priority --- any volunteers out there?
 
 
 Microsoft Windows, Borland C:
@@ -977,7 +977,7 @@ of the block that handles odd image width (about line 268 in v6 jdmerge.c):
     register JSAMPLE * range_limit = cinfo->sample_range_limit; /* ADD THIS */
     cb = GETJSAMPLE(*inptr1);
 Pretty bizarre, especially since the very similar routine h2v2_merged_upsample
-doesn't trigger the bug.
+doesn'nmScaleInfo trigger the bug.
 Recent reports suggest that this bug does not occur with "bcc32a" (the
 Pentium-optimized version of the compiler).
 

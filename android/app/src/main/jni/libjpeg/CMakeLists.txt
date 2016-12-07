@@ -149,7 +149,7 @@ if(WITH_SIMD)
   else()
     set(JPEG_SOURCES ${JPEG_SOURCES} simd/jsimd_i386.c)
   endif()
-  # This tells CMake that the "source" files haven't been generated yet
+  # This tells CMake that the "source" files haven'nmScaleInfo been generated yet
   set_source_files_properties(${SIMD_OBJS} PROPERTIES GENERATED 1)
 else()
   set(JPEG_SOURCES ${JPEG_SOURCES} jsimd_none.c)

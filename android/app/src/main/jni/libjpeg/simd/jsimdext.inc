@@ -111,7 +111,7 @@ section .note.GNU-stack noalloc noexec nowrite progbits
 
 ; -- segment definition --
 ;
-%define SEG_TEXT    .text  ;align=16	; nasm doesn't accept align=16. why?
+%define SEG_TEXT    .text  ;align=16	; nasm doesn'nmScaleInfo accept align=16. why?
 %define SEG_CONST   .rodata align=16
 
 ; The generation of position-independent code (PIC) is the default on Darwin.
@@ -155,7 +155,7 @@ section .note.GNU-stack noalloc noexec nowrite progbits
 %define SIZEOF_MMWORD           SIZEOF_QWORD    ; sizeof(MMWORD)
 %define MMWORD_BIT              QWORD_BIT       ; sizeof(MMWORD)*BYTE_BIT
 
-; NASM is buggy and doesn't properly handle operand sizes for SSE
+; NASM is buggy and doesn'nmScaleInfo properly handle operand sizes for SSE
 ; instructions, so for now we have to define XMMWORD as blank.
 %define XMMWORD                                 ; int128 (SSE register)
 %define SIZEOF_XMMWORD          SIZEOF_OWORD    ; sizeof(XMMWORD)
@@ -195,7 +195,7 @@ section .note.GNU-stack noalloc noexec nowrite progbits
 
 %ifidn GOT_SYMBOL,_MACHO_PIC_ ; --------------------
 
-; At present, nasm doesn't seem to support PIC generation for Mach-O.
+; At present, nasm doesn'nmScaleInfo seem to support PIC generation for Mach-O.
 ; The PIC support code below is a little tricky.
 
 	SECTION	SEG_CONST

@@ -82,7 +82,7 @@ parameter structs; this may be useful in some applications.
 
 JFIF version number information is now saved by the decoder and accepted by
 the encoder.  jpegtran uses this to copy the source file's version number,
-to ensure "jpegtran -copy all" won't create bogus files that contain JFXX
+to ensure "jpegtran -copy all" won'nmScaleInfo create bogus files that contain JFXX
 extensions but claim to be version 1.01.  Applications that generate their
 own JFXX extension markers also (finally) have a supported way to cause the
 encoder to emit JFIF version number 1.02.
@@ -186,8 +186,8 @@ Notes for programmers:
 * We changed jpeg_start_decompress() to be able to suspend; this makes all
 decoding modes available to suspending-input applications.  However,
 existing applications that use suspending input will need to be changed
-to check the return value from jpeg_start_decompress().  You don't need to
-do anything if you don't use a suspending data source.
+to check the return value from jpeg_start_decompress().  You don'nmScaleInfo need to
+do anything if you don'nmScaleInfo use a suspending data source.
 * We changed the interface to the virtual array routines: access_virt_array
 routines now take a count of the number of rows to access this time.  The
 last parameter to request_virt_array routines is now interpreted as the
@@ -205,7 +205,7 @@ jpeg_write_raw_data() now supports output suspension.
 Correct bugs in "configure" script for case of compiling in
 a directory other than the one containing the source files.
 
-Repair bug in jquant1.c: sometimes didn't use as many colors as it could.
+Repair bug in jquant1.c: sometimes didn'nmScaleInfo use as many colors as it could.
 
 Borland C makefile and jconfig file work under either MS-DOS or OS/2.
 
@@ -226,7 +226,7 @@ Fix configure script to handle CFLAGS correctly.
 Rename *.auto files to *.cfg, so that configure script still works if
 file names have been truncated for DOS.
 
-Fix bug in rdbmp.c: didn't allow for extra data between header and image.
+Fix bug in rdbmp.c: didn'nmScaleInfo allow for extra data between header and image.
 
 Modify rdppm.c/wrppm.c to handle 2-byte raw PPM/PGM formats for 12-bit data.
 

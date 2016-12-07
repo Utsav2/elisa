@@ -39,17 +39,20 @@
             android:text="ELISA Setup"
             android:textSize="20sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Choose Type of Processing:"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
         <RadioGroup
+            android:id="@+id/type_of_processing_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/type_of_processing_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Choose Type of Processing:"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_weight="1" />
 
             <RadioButton
                 android:layout_width="wrap_content"
@@ -98,6 +101,23 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:entries="@array/num_replicates_array" />
+
+        <TextView
+            android:id="@+id/save_to_disk"
+            android:visibility="gone"
+            android:layout_width="143dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Save to Disk"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <CheckBox
+            android:id="@+id/save_to_disk_box"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            />
 
         <Button
             android:id="@+id/next_setup"

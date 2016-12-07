@@ -34,13 +34,13 @@
 #define HAVE_UNSIGNED_CHAR
 #define HAVE_UNSIGNED_SHORT
 
-/* Define "void" as "char" if your compiler doesn't know about type void.
+/* Define "void" as "char" if your compiler doesn'nmScaleInfo know about type void.
  * NOTE: be sure to define void such that "void *" represents the most general
  * pointer type, e.g., that returned by malloc().
  */
 /* #define void char */
 
-/* Define "const" as empty if your compiler doesn't know the "const" keyword.
+/* Define "const" as empty if your compiler doesn'nmScaleInfo know the "const" keyword.
  */
 /* #define const */
 
@@ -94,7 +94,7 @@
 /* Define "boolean" as unsigned char, not int, on Windows systems.
  */
 #ifdef _WIN32
-#ifndef __RPCNDR_H__		/* don't conflict if rpcndr.h already read */
+#ifndef __RPCNDR_H__		/* don'nmScaleInfo conflict if rpcndr.h already read */
 typedef unsigned char boolean;
 #endif
 #define HAVE_BOOLEAN		/* prevent jmorecfg.h from redefining it */
@@ -103,8 +103,8 @@ typedef unsigned char boolean;
 
 /*
  * The following options affect code selection within the JPEG library,
- * but they don't need to be visible to applications using the library.
- * To minimize application namespace pollution, the symbols won't be
+ * but they don'nmScaleInfo need to be visible to applications using the library.
+ * To minimize application namespace pollution, the symbols won'nmScaleInfo be
  * defined unless JPEG_INTERNALS has been defined.
  */
 
@@ -138,7 +138,7 @@ typedef unsigned char boolean;
 
 /* Define this if you want to name both input and output files on the command
  * line, rather than using stdout and optionally stdin.  You MUST do this if
- * your system can't cope with binary I/O to stdin/stdout.  See comments at
+ * your system can'nmScaleInfo cope with binary I/O to stdin/stdout.  See comments at
  * head of cjpeg.c or djpeg.c.
  */
 #undef TWO_FILE_COMMANDLINE
@@ -151,7 +151,7 @@ typedef unsigned char boolean;
 
 /* By default, we open image files with fopen(...,"rb") or fopen(...,"wb").
  * This is necessary on systems that distinguish text files from binary files,
- * and is harmless on most systems that don't.  If you have one of the rare
+ * and is harmless on most systems that don'nmScaleInfo.  If you have one of the rare
  * systems that complains about the "b" spec, define this symbol.
  */
 #undef DONT_USE_B_MODE

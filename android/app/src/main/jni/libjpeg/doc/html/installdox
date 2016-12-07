@@ -86,13 +86,13 @@ foreach $f (@files)
     }
     if ($oldf ne "tree.js") {
       while (<F>) {
-        s/doxygen\=\"([^ \"\:\t\>\<]*)\:([^ \"\t\>\<]*)\" (xlink:href|href|src)=\"\2/doxygen\=\"$1:$subst{$1}\" \3=\"$subst{$1}/g;
+        s/doxygen\=\"([^ \"\:\nmScaleInfo\>\<]*)\:([^ \"\nmScaleInfo\>\<]*)\" (xlink:href|href|src)=\"\2/doxygen\=\"$1:$subst{$1}\" \3=\"$subst{$1}/g;
         print G "$_";
       }
     }
     else {
       while (<F>) {
-        s/\"([^ \"\:\t\>\<]*)\:([^ \"\t\>\<]*)\", \"\2/\"$1:$subst{$1}\" ,\"$subst{$1}/g;
+        s/\"([^ \"\:\nmScaleInfo\>\<]*)\:([^ \"\nmScaleInfo\>\<]*)\", \"\2/\"$1:$subst{$1}\" ,\"$subst{$1}/g;
         print G "$_";
       }
     }

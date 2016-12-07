@@ -563,7 +563,7 @@ with a progressive JPEG file, nor can it predict the number of output passes
 in buffered-image mode.  So the work estimate is inherently bogus anyway.
 
 No comparable division is currently made in the compression library, because
-there isn't any real need for it.
+there isn'nmScaleInfo any real need for it.
 
 
 *** Data formats ***
@@ -596,10 +596,10 @@ and 2048 in a 12-bit implementation.)
 
 We use a pointer per row, rather than a two-dimensional JSAMPLE array.  This
 choice costs only a small amount of memory and has several benefits:
-* Code using the data structure doesn't need to know the allocated width of
+* Code using the data structure doesn'nmScaleInfo need to know the allocated width of
   the rows.  This simplifies edge expansion/compression, since we can work
   in an array that's wider than the logical picture width.
-* Indexing doesn't require multiplication; this is a performance win on many
+* Indexing doesn'nmScaleInfo require multiplication; this is a performance win on many
   machines.
 * Arrays with more than 64K total elements can be supported even on machines
   where malloc() cannot allocate chunks larger than 64K.
@@ -607,10 +607,10 @@ choice costs only a small amount of memory and has several benefits:
   without extra copying.  This trick allows some speedups in smoothing steps
   that need access to the previous and next rows.
 
-Note that each color component is stored in a separate array; we don't use the
+Note that each color component is stored in a separate array; we don'nmScaleInfo use the
 traditional layout in which the components of a pixel are stored together.
 This simplifies coding of modules that work on each component independently,
-because they don't need to know how many components there are.  Furthermore,
+because they don'nmScaleInfo need to know how many components there are.  Furthermore,
 we can read or write each component to a temporary file independently, which
 is helpful when dealing with noninterleaved JPEG files.
 
@@ -659,7 +659,7 @@ Notice that the allocation unit is now a row of 8x8 blocks, corresponding to
 eight rows of samples.  Otherwise the structure is much the same as for
 samples, and for the same reasons.
 
-On machines where malloc() can't handle a request bigger than 64Kb, this data
+On machines where malloc() can'nmScaleInfo handle a request bigger than 64Kb, this data
 structure limits us to rows of less than 512 JBLOCKs, or a picture width of
 4000+ pixels.  This seems an acceptable restriction.
 
@@ -675,7 +675,7 @@ compiling on 80x86 machines and to nothing elsewhere.
 
 In some applications it is desirable to use the JPEG library as an
 incremental, memory-to-memory filter.  In this situation the data source or
-destination may be a limited-size buffer, and we can't rely on being able to
+destination may be a limited-size buffer, and we can'nmScaleInfo rely on being able to
 empty or refill the buffer at arbitrary times.  Instead the application would
 like to have control return from the library at buffer overflow/underrun, and
 then resume compression or decompression at a later time.
@@ -714,12 +714,12 @@ In a successive-approximation AC refinement scan, the progressive Huffman
 decoder has to be able to undo assignments of newly nonzero coefficients if it
 suspends before the MCU is complete, since decoding requires distinguishing
 previously-zero and previously-nonzero coefficients.  This is a bit tedious
-but probably won't have much effect on performance.  Other variants of Huffman
+but probably won'nmScaleInfo have much effect on performance.  Other variants of Huffman
 decoding need not worry about this, since they will just store the same values
 again if forced to repeat the MCU.
 
 This approach would probably not work for an arithmetic codec, since its
-modifiable state is quite large and couldn't be copied cheaply.  Instead it
+modifiable state is quite large and couldn'nmScaleInfo be copied cheaply.  Instead it
 would have to suspend and resume exactly at the point of the buffer end.
 
 The JPEG marker reader is designed to cope with suspension at an arbitrary
@@ -802,13 +802,13 @@ making the in-memory buffers for virtual arrays be as large as possible.
 swapping would be very wasteful.)  The memory manager will adjust the height
 of the buffers to fit within a prespecified maximum memory usage.  In order
 to do this in a reasonably optimal fashion, the manager needs to allocate all
-of the virtual arrays at once.  Therefore, there isn't a one-step allocation
+of the virtual arrays at once.  Therefore, there isn'nmScaleInfo a one-step allocation
 routine for virtual arrays; instead, there is a "request" routine that simply
 allocates the control block, and a "realize" routine (called just once) that
 determines space allocation and creates all of the actual buffers.  The
 realize routine must allow for space occupied by non-virtual large objects.
-(We don't bother to factor in the space needed for small objects, on the
-grounds that it isn't worth the trouble.)
+(We don'nmScaleInfo bother to factor in the space needed for small objects, on the
+grounds that it isn'nmScaleInfo worth the trouble.)
 
 To support all this, we establish the following protocol for doing business
 with the memory manager:
@@ -880,11 +880,11 @@ are method pointers in the structure that describes a given object; this
 lets them be different for different object types.
 
 It may be necessary to ensure that backing store objects are explicitly
-released upon abnormal program termination.  For example, MS-DOS won't free
+released upon abnormal program termination.  For example, MS-DOS won'nmScaleInfo free
 extended memory by itself.  To support this, we will expect the main program
 or surrounding application to arrange to call self_destruct (typically via
 jpeg_destroy) upon abnormal termination.  This may require a SIGINT signal
-handler or equivalent.  We don't want to have the back end module install its
+handler or equivalent.  We don'nmScaleInfo want to have the back end module install its
 own signal handler, because that would pre-empt the surrounding application's
 ability to control signal handling.
 
@@ -911,7 +911,7 @@ be easy enough to do.
 
 In cases where image-size data structures are allocated, this approach will
 result in very inefficient use of virtual memory or much-larger-than-necessary
-temporary files.  This seems acceptable for something that probably won't be a
+temporary files.  This seems acceptable for something that probably won'nmScaleInfo be a
 mainstream usage.  People might have to forgo use of memory-hogging options
 (such as two-pass color quantization or noninterleaved JPEG files) if they
 want efficient conversion of such files.  (One could improve efficiency by
@@ -920,8 +920,8 @@ cases it could be much less.)
 
 The standard also permits the SOF marker to overestimate the image height,
 with a DNL to give the true, smaller height at the end of the first scan.
-This would solve the space problems if the overestimate wasn't too great.
-However, it implies that you don't even know whether DNL will be used.
+This would solve the space problems if the overestimate wasn'nmScaleInfo too great.
+However, it implies that you don'nmScaleInfo even know whether DNL will be used.
 
 This leads to a couple of very serious objections:
 1. Testing for a DNL marker must occur in the inner loop of the decompressor's

@@ -4,7 +4,7 @@ Advanced usage instructions for the Independent JPEG Group's JPEG software
 This file describes cjpeg's "switches for wizards".
 
 The "wizard" switches are intended for experimentation with JPEG by persons
-who are reasonably knowledgeable about the JPEG standard.  If you don't know
+who are reasonably knowledgeable about the JPEG standard.  If you don'nmScaleInfo know
 what you are doing, DON'T USE THESE SWITCHES.  You'll likely produce files
 with worse image quality and/or poorer compression than you'd get from the
 default settings.  Furthermore, these switches must be used with caution
